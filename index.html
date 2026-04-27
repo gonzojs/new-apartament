@@ -214,6 +214,155 @@
       .grid { grid-template-columns: 1fr; }
       .cat-title { font-size: 28px; }
     }
+
+    /* ── FAB ──────────────────────────────────────────────── */
+    .fab {
+      position: fixed; bottom: 28px; right: 28px; z-index: 900;
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      border: none; font-size: 26px; line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(184,92,56,.4);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(184,92,56,.5); }
+
+    /* ── MODAL ────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(26,21,18,.55);
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal {
+      background: var(--surface); border-radius: var(--r);
+      padding: 32px; width: 100%; max-width: 480px;
+      box-shadow: var(--sh-lg); position: relative;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px; font-weight: 400; margin-bottom: 24px;
+    }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px;
+      background: none; border: none; cursor: pointer;
+      font-size: 22px; color: var(--muted);
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; transition: background .15s, color .15s;
+    }
+    .modal-close:hover { background: var(--border); color: var(--text); }
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block; font-size: 11px; font-weight: 500;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 6px;
+    }
+    .form-input, .form-select {
+      width: 100%; padding: 10px 14px;
+      border: 1.5px solid var(--border); border-radius: var(--r-sm);
+      font-family: 'Jost', sans-serif; font-size: 14px; font-weight: 300;
+      color: var(--text); background: var(--bg);
+      transition: border-color .15s; outline: none;
+    }
+    .form-input:focus, .form-select:focus { border-color: var(--accent); }
+    textarea.form-input { min-height: 88px; resize: vertical; }
+    .preview-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px; background: var(--bg);
+      border-radius: var(--r-sm); border: 1.5px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .preview-thumb {
+      width: 56px; height: 56px; border-radius: 6px;
+      object-fit: cover; flex-shrink: 0; background: var(--border);
+    }
+    .preview-info { font-size: 13px; color: var(--muted); line-height: 1.4; }
+    .btn-submit {
+      width: 100%; padding: 12px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--r-sm);
+      font-family: 'Jost', sans-serif; font-size: 14px;
+      font-weight: 500; letter-spacing: .06em;
+      cursor: pointer; transition: opacity .15s; margin-top: 8px;
+    }
+    .btn-submit:hover { opacity: .88; }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+    .form-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .loading-state {
+      text-align: center; padding: 60px 20px;
+      color: var(--muted); font-size: 14px;
+    }
+    .delete-btn {
+      position: absolute; top: 8px; left: 8px; z-index: 2;
+      background: rgba(26,21,18,.6); color: #fff;
+      border: none; border-radius: 50%;
+      width: 26px; height: 26px; font-size: 14px;
+      cursor: pointer; display: none;
+      align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .card:hover .delete-btn { display: flex; }
+    .delete-btn:hover { background: rgba(184,92,56,.9); }
+
+    .comment-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 2px;
+      padding: 8px 14px;
+      font-size: 12.5px; font-weight: 500;
+      color: var(--muted);
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      font-family: 'Jost', sans-serif;
+      transition: border-color .2s, color .2s;
+      align-self: flex-start;
+    }
+    .comment-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .comment-badge {
+      min-width: 20px; height: 20px; padding: 0 6px;
+      border-radius: 100px; background: var(--soft);
+      color: var(--accent); font-size: 11px; font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .comments-scroll {
+      max-height: min(240px, 40vh);
+      overflow-y: auto;
+      margin-bottom: 20px;
+      padding: 4px 2px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .comment-row {
+      padding: 12px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      position: relative;
+    }
+    .comment-meta {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; margin-bottom: 8px;
+      font-size: 11px; color: var(--muted);
+    }
+    .comment-author-pill {
+      font-weight: 500; text-transform: uppercase; letter-spacing: .06em;
+      color: var(--accent);
+    }
+    .comment-text { font-size: 14px; line-height: 1.45; color: var(--text); }
+    .comment-row-del {
+      position: absolute; top: 8px; right: 8px;
+      width: 24px; height: 24px; border: none; border-radius: 50%;
+      background: transparent; color: var(--muted); cursor: pointer;
+      font-size: 16px; line-height: 1; opacity: .6;
+    }
+    .comment-row:hover .comment-row-del { opacity: 1; }
+    .comment-row-del:hover { color: var(--accent); }
+    .comments-empty { font-size: 13px; color: var(--muted); text-align: center; padding: 16px; }
   </style>
 </head>
 <body>
@@ -248,79 +397,73 @@
   <div id="js-cats-container"></div>
 </main>
 
+<!-- ── FAB ──────────────────────────────────────────────── -->
+<button class="fab" id="js-fab" title="Añadir producto" aria-label="Añadir producto">+</button>
+
+<!-- ── ADD MODAL ─────────────────────────────────────────── -->
+<div class="modal-overlay hidden" id="js-modal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <button class="modal-close" id="js-modal-close" aria-label="Cerrar">×</button>
+    <h2 class="modal-title">Añadir <em>Producto</em></h2>
+    <form id="js-add-form" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="add-url">URL del Producto</label>
+        <input class="form-input" type="url" id="add-url" placeholder="https://northdeco.com/..." required>
+      </div>
+      <div id="js-preview-wrap"></div>
+      <div class="form-group">
+        <label class="form-label" for="add-name">Nombre</label>
+        <input class="form-input" type="text" id="add-name" placeholder="Mesa SAURA Azul" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="add-cat">Categoría</label>
+        <select class="form-select" id="add-cat">
+          <option value="Sofás y Asientos">🛋️ Sofás y Asientos</option>
+          <option value="Mesas de Comedor">🍽️ Mesas de Comedor</option>
+          <option value="Muebles de TV">📺 Muebles de TV</option>
+          <option value="Mesas Auxiliares" selected>☕ Mesas Auxiliares</option>
+          <option value="Bancos">🪑 Bancos</option>
+          <option value="Almacenaje">🗄️ Almacenaje</option>
+          <option value="Dormitorio &amp; Oficina">🛏️ Dormitorio &amp; Oficina</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="add-store">Tienda</label>
+        <input class="form-input" type="text" id="add-store" placeholder="Northdeco">
+      </div>
+      <button class="btn-submit" type="submit" id="js-add-submit">Añadir producto</button>
+    </form>
+  </div>
+</div>
+
+<!-- ── COMMENTS MODAL ──────────────────────────────────────── -->
+<div class="modal-overlay hidden" id="js-comment-modal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <button class="modal-close" id="js-comment-modal-close" type="button" aria-label="Cerrar">×</button>
+    <h2 class="modal-title" id="js-comment-modal-title">Comentarios</h2>
+    <div class="comments-scroll" id="js-comments-list" aria-live="polite"></div>
+    <form id="js-comment-form" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="comment-author">Quién escribe</label>
+        <select class="form-select" id="comment-author" name="author">
+          <option value="me">Yo</option>
+          <option value="designer">Diseño</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="comment-text">Nuevo comentario</label>
+        <textarea class="form-input" id="comment-text" rows="3" placeholder="Escribe una nota para este producto…" required></textarea>
+      </div>
+      <button class="btn-submit" type="submit" id="js-comment-submit">Añadir comentario</button>
+    </form>
+  </div>
+</div>
+
 <footer>Hecho con <b>♥</b> &nbsp;·&nbsp; Mi Nuevo Apartamento &nbsp;·&nbsp; 2026</footer>
 
 <script>
-/* ── DATA ─────────────────────────────────────────────────── */
-const ITEMS = [
-  // Sofás y Asientos
-  { cat:"Sofás y Asientos",    name:"Sofá Sierra 4 Plazas",           store:"Habitat",   img:"https://cdn.habitat.fr/thumbnails/product/122/122396/medium/0/13549251.webp",
-    url:"https://www.habitat-design.com/es-es/p/sierra-sofa-4-plazas-de-tejido-kumal-con-relleno-de-plumas-azul-marino" },
-  { cat:"Sofás y Asientos",    name:"Sofá Cama PAOLY Pana",            store:"Sklum",     img:"https://cdn.sklum.com/es/5172832-large_default/sofa-cama-de-2-plazas-en-pana-envasado-al-vacio-paoly.jpg",
-    url:"https://www.sklum.com/es/comprar-sofa-cama/226575-sofa-cama-de-2-plazas-en-pana-envasado-al-vacio-paoly.html" },
-  { cat:"Sofás y Asientos",    name:"4× Sillas ANELA",                 store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/20260211-SesionArame5463copia.jpg?v=1773156486",
-    url:"https://northdeco.com/collections/sillas-de-diseno/products/silla-comedor-anela?variant=55253067694466" },
-  { cat:"Sofás y Asientos",    name:"Folk Pouf Tall & Wide Bundle",    store:"noo.ma",    img:"http://noo.ma/cdn/shop/products/blueberry_black.png?v=1627383917&width=2048",
-    url:"https://noo.ma/fr/collections/furniture/products/folk-tall-wide-bundle?variant=32766289248336" },
-
-  // Mesas de Comedor
-  { cat:"Mesas de Comedor",    name:"Mesa GALA Roble",                 store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/Northdeco_Summer25_1284.jpg?v=1748939638",
-    url:"https://northdeco.com/products/mesa-de-comedor-redonda-extensible-gala?variant=46829938966865" },
-  { cat:"Mesas de Comedor",    name:"Mesa GALA Nogal",                 store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/Northdeco_Summer25_1686_68dfebb4-8d91-4936-8df8-6b52bb40f1b4.jpg?v=1748957218",
-    url:"https://northdeco.com/products/mesa-de-comedor-redonda-extensible-gala-walnut-120-150-cm?pr_prod_strat=e5_desc&pr_rec_id=0d2d94c6d&pr_rec_pid=8857698173265&pr_ref_pid=8645350261073&pr_seq=uniform&variant=47675040039249" },
-
-  // Muebles de TV
-  { cat:"Muebles de TV",       name:"Mueble TV ALTREX Acacia/Inox",   store:"Sklum",     img:"https://cdn.sklum.com/es/5199549-large_default/mueble-tv-en-madera-de-acacia-y-acero-inoxidable-altrex.jpg",
-    url:"https://www.sklum.com/es/comprar-muebles-tv/222200-mueble-tv-en-madera-de-acacia-y-acero-inoxidable-altrex.html?id_c=664775" },
-  { cat:"Muebles de TV",       name:"Mueble TV ALAZNE MDF",            store:"Sklum",     img:"https://cdn.sklum.com/es/4253682-large_default/mueble-tv-180x40-cm-en-mdf-alazne.jpg",
-    url:"https://www.sklum.com/es/comprar-muebles-tv/175312-mueble-tv-180x40-cm-en-mdf-alazne.html?id_c=419152" },
-  { cat:"Muebles de TV",       name:"Mueble TV MICHIGAN Acero",        store:"Sklum",     img:"https://cdn.sklum.com/es/4333950-large_default/mueble-tv-180x40-cm-en-acero-michigan.jpg",
-    url:"https://www.sklum.com/es/comprar-muebles-tv/186426-mueble-tv-180x40-cm-en-acero-michigan.html?id_c=497544" },
-  { cat:"Muebles de TV",       name:"Mueble TV LUENA Inoxidable",      store:"Sklum",     img:"https://cdn.sklum.com/es/5135937-large_default/mueble-tv-180x40-cm-en-acero-inoxidable-luena.jpg",
-    url:"https://www.sklum.com/es/comprar-muebles-tv/227829-mueble-tv-180x40-cm-en-acero-inoxidable-luena.html" },
-
-  // Mesas Auxiliares
-  { cat:"Mesas Auxiliares",    name:"Mesa Centro CORINA Nogal",        store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/Mesa-Corina-CasaJU-Northdeco-ProductoI.jpg?v=1759925419",
-    url:"https://northdeco.com/products/mesa-de-centro-corina-110-x-55-cm?variant=42101022621875" },
-  { cat:"Mesas Auxiliares",    name:"2× Mesas Auxiliares ANDE",        store:"noo.ma",    img:"http://noo.ma/cdn/shop/products/nooma_FUR1350.34-bundle.png?v=1666943767&width=2048",
-    url:"https://noo.ma/fr/collections/furniture/products/2x-ande-side-table?variant=40443080802475" },
-  { cat:"Mesas Auxiliares",    name:"Mesa Auxiliar SAURA Azul",        store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/20260128-SesionEresArte4243.jpg?v=1771240742",
-    url:"https://northdeco.com/collections/mesas-auxiliares/products/mesa-saura?variant=55608925127042" },
-  { cat:"Mesas Auxiliares",    name:"Mesa Auxiliar SAURA Transparente",store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/20260128-SesionEresArte4243.jpg?v=1771240742",
-    url:"https://northdeco.com/collections/mesas-auxiliares/products/mesa-saura?variant=54881572979074" },
-  { cat:"Mesas Auxiliares",    name:"Mesita RILO Azul",                store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/20260211-SesionArame4864copia.jpg?v=1773156172",
-    url:"https://northdeco.com/collections/outlet/products/mesita-auxiliar-rilo-37x46-cm?variant=55081732964738" },
-  { cat:"Mesas Auxiliares",    name:"Mesita RILO Negra",               store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/20260211-SesionArame4864copia.jpg?v=1773156172",
-    url:"https://northdeco.com/collections/outlet/products/mesita-auxiliar-rilo-37x46-cm?variant=49829988270417" },
-  { cat:"Mesas Auxiliares",    name:"Mesa BONET Metal/Cristal",        store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/20260211-SesionArame6035copia.jpg?v=1773228131",
-    url:"https://northdeco.com/collections/mesas-auxiliares/products/mesa-auxiliar-de-metal-y-cristal-templado-bonet?variant=56320834601346" },
-  { cat:"Mesas Auxiliares",    name:"Mesa JOHANNA Cubo Cristal",       store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/Mesa_Johanna_ND-0811-BLUE_03_a3e1a96e-1b70-43e5-9146-48eb24a30da6.jpg?v=1723810080",
-    url:"https://northdeco.com/collections/outlet/products/mesa-de-cristal-cuadrada-johanna-40x40-cm?variant=49063256392017" },
-
-  // Bancos
-  { cat:"Bancos",              name:"Banco RIOLUT Ratán/Madera",       store:"Sklum",     img:"https://cdn.sklum.com/es/2257692-large_default/banco-en-ratan-y-madera-riolut.jpg",
-    url:"https://www.sklum.com/es/comprar-bancos/92041-banco-en-ratan-y-madera-riolut.html" },
-  { cat:"Bancos",              name:"Banco KARVIA Tela/Acacia",        store:"Sklum",     img:"https://cdn.sklum.com/es/4994261-large_default/banco-180-cm-en-madera-de-acacia-y-tela-karvia.jpg",
-    url:"https://www.sklum.com/es/comprar-bancos/200118-banco-180-cm-en-madera-de-acacia-y-tela-karvia.html?id_c=577295" },
-  { cat:"Bancos",              name:"Banco DUBAI Acacia",              store:"Sklum",     img:"https://cdn.sklum.com/es/4851335-large_default/banco-en-madera-de-acacia-dubai.jpg",
-    url:"https://www.sklum.com/es/comprar-bancos/211180-banco-en-madera-de-acacia-dubai.html?id_c=588466" },
-
-  // Almacenaje
-  { cat:"Almacenaje",          name:"Banco Zapatero BRUCK",            store:"The Masie", img:"https://cdn.themasie.com/es/4569007-large_default/banco-zapatero-con-almacenaje-de-acero-laminado-bruck-.jpg",
-    url:"https://www.themasie.com/es/comprar-zapateros/130652-banco-zapatero-con-almacenaje-de-acero-laminado-bruck-.html" },
-  { cat:"Almacenaje",          name:"Vestidor KRAUFORD Bambú",         store:"Sklum",     img:"https://cdn.sklum.com/es/4367991-large_default/vestidor-abierto-en-madera-de-bambu-krauford.jpg",
-    url:"https://www.sklum.com/es/comprar-armarios/100305-vestidor-abierto-en-madera-de-bambu-krauford.html" },
-  { cat:"Almacenaje",          name:"Armario JANINE Acero",            store:"Sklum",     img:"https://cdn.sklum.com/es/4393948-large_default/armario-abierto-con-cajones-en-acero-janine.jpg",
-    url:"https://www.sklum.com/es/comprar-armarios/186380-armario-abierto-con-cajones-en-acero-janine.html" },
-
-  // Dormitorio & Oficina
-  { cat:"Dormitorio & Oficina",name:"2× Estructura ELLINGE 150×190",  store:"JYSK",      img:"https://cdn1.jysk.com/getimage/wd3.large/236088",
-    url:"https://jysk.es/dormitorio/camas/canapes-somieres-y-estructuras-de-cama/estructuras-de-cama/estructura-cama-ellinge-150x190-almacenaje-roble-calido" },
-  { cat:"Dormitorio & Oficina",name:"Escritorio FLEXISPOT Elevable",   store:"Amazon",    img: null,
-    url:"https://www.amazon.es/dp/B0DMNY2MF4" },
-  { cat:"Dormitorio & Oficina",name:"Alfombra COME Crudo",             store:"Habitat",   img:"https://cdn.habitat.fr/thumbnails/product/121/121685/medium/0/13540400.webp",
-    url:"https://www.habitat-design.com/es-es/p/come-alfombra-de-lana-con-acabado-tufte-170-x-240-cm-crudo-design-by-floriane-jacques" },
-];
+/* ── DATA (loaded from API) ───────────────────────────────── */
+let ITEMS = [];
 
 const ICONS = {
   "Sofás y Asientos":    "🛋️",
@@ -363,6 +506,7 @@ function makeCard(item, id) {
   const on = favs.has(id);
   const st = STORE_STYLE[item.store] || { color:'#666', bg:'#f5f5f5' };
   const icon = ICONS[item.cat] || '📦';
+  const nComments = (item.comments && item.comments.length) || 0;
 
   const card = document.createElement('div');
   card.className = 'card';
@@ -385,6 +529,14 @@ function makeCard(item, id) {
     thumb.appendChild(makePlaceholder(icon));
   }
 
+  // delete button
+  const delBtn = document.createElement('button');
+  delBtn.className = 'delete-btn';
+  delBtn.title = 'Eliminar';
+  delBtn.textContent = '×';
+  delBtn.addEventListener('click', e => { e.stopPropagation(); deleteItem(item.url); });
+  thumb.appendChild(delBtn);
+
   // fav button on top of thumb
   const favBtn = document.createElement('button');
   favBtn.className = 'fav-btn' + (on ? ' on' : '');
@@ -400,6 +552,10 @@ function makeCard(item, id) {
   body.innerHTML = `
     <div class="card-name">${item.name}</div>
     <span class="store-badge" style="color:${st.color};background:${st.bg};border-color:${st.color}30">${item.store}</span>
+    <button type="button" class="comment-btn" aria-label="Comentarios del producto">
+      <span>Comentarios</span>
+      ${nComments ? `<span class="comment-badge">${nComments}</span>` : ''}
+    </button>
     <a class="card-link" href="${item.url}" target="_blank" rel="noopener noreferrer">
       Ver producto
       <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
@@ -407,6 +563,11 @@ function makeCard(item, id) {
       </svg>
     </a>
   `;
+  body.querySelector('.comment-btn').addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openCommentModal(item);
+  });
 
   card.appendChild(thumb);
   card.appendChild(body);
@@ -436,11 +597,268 @@ function renderFavSection() {
   });
 }
 
+/* ── INIT ────────────────────────────────────────────────── */
+async function init() {
+  const container = document.getElementById('js-cats-container');
+  container.innerHTML = '<div class="loading-state">Cargando productos…</div>';
+  try {
+    const res = await fetch('/api/products');
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    ITEMS = await res.json();
+  } catch (e) {
+    container.innerHTML = `<div class="loading-state">Error al cargar productos: ${e.message}<br>Recarga la página.</div>`;
+    return;
+  }
+  render();
+}
+
+/* ── ADD MODAL ───────────────────────────────────────────── */
+const modal       = document.getElementById('js-modal');
+const fab         = document.getElementById('js-fab');
+const modalClose  = document.getElementById('js-modal-close');
+const addForm     = document.getElementById('js-add-form');
+const urlInput    = document.getElementById('add-url');
+const nameInput   = document.getElementById('add-name');
+const storeInput  = document.getElementById('add-store');
+const previewWrap = document.getElementById('js-preview-wrap');
+const submitBtn   = document.getElementById('js-add-submit');
+
+const commentModal       = document.getElementById('js-comment-modal');
+const commentModalClose  = document.getElementById('js-comment-modal-close');
+const commentModalTitle  = document.getElementById('js-comment-modal-title');
+const commentsListEl     = document.getElementById('js-comments-list');
+const commentForm        = document.getElementById('js-comment-form');
+const commentText        = document.getElementById('comment-text');
+const commentAuthor      = document.getElementById('comment-author');
+const commentSubmit      = document.getElementById('js-comment-submit');
+let commentTargetUrl     = null;
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+fab.addEventListener('click', () => { modal.classList.remove('hidden'); urlInput.focus(); });
+modalClose.addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (!commentModal.classList.contains('hidden')) { closeCommentModal(); return; }
+  closeModal();
+});
+
+function closeModal() {
+  modal.classList.add('hidden');
+  addForm.reset();
+  previewWrap.innerHTML = '';
+  submitBtn.disabled = false;
+  submitBtn.textContent = 'Añadir producto';
+}
+
+let previewTimer = null;
+urlInput.addEventListener('input', () => {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(() => fetchPreview(urlInput.value.trim()), 700);
+});
+
+async function fetchPreview(url) {
+  if (!url.startsWith('http')) return;
+  previewWrap.innerHTML = '<p class="form-hint">Buscando información…</p>';
+  try {
+    const data = await fetch(`/api/preview?url=${encodeURIComponent(url)}`).then(r => r.json());
+    if (data.title && !nameInput.value) nameInput.value = data.title;
+    if (data.store && !storeInput.value) storeInput.value = data.store;
+    previewWrap.innerHTML = data.img
+      ? `<div class="preview-card"><img class="preview-thumb" src="${data.img}" alt="" onerror="this.style.display='none'"><div class="preview-info">${data.title || url}</div></div>`
+      : '';
+  } catch { previewWrap.innerHTML = ''; }
+}
+
+addForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const url   = urlInput.value.trim();
+  const name  = nameInput.value.trim();
+  const cat   = document.getElementById('add-cat').value;
+  const store = storeInput.value.trim();
+  if (!url || !name) return;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Añadiendo…';
+  try {
+    const res = await fetch('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, name, cat, store }),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    ITEMS = await res.json();
+    closeModal();
+    render();
+  } catch {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Error — Reintentar';
+  }
+});
+
+function getCommentItem() {
+  return ITEMS.find(i => i.url === commentTargetUrl);
+}
+
+function formatCommentAt(iso) {
+  try {
+    return new Date(iso).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' });
+  } catch { return ''; }
+}
+
+function labelAuthor(author) {
+  return author === 'designer' ? 'Diseño' : 'Yo';
+}
+
+function openCommentModal(item) {
+  commentTargetUrl = item.url;
+  commentModalTitle.innerHTML = 'Comentarios <span style="color:var(--muted);font-weight:300;">· ' + escapeHtml(item.name) + '</span>';
+  const saved = localStorage.getItem('apt-comment-author');
+  if (saved === 'designer' || saved === 'me') commentAuthor.value = saved;
+  renderCommentsList();
+  commentText.value = '';
+  commentModal.classList.remove('hidden');
+  setTimeout(() => commentText.focus(), 50);
+}
+
+function closeCommentModal() {
+  commentModal.classList.add('hidden');
+  commentTargetUrl = null;
+  commentForm.reset();
+  const saved = localStorage.getItem('apt-comment-author');
+  if (saved === 'designer' || saved === 'me') commentAuthor.value = saved;
+}
+
+function renderCommentsList() {
+  const item = getCommentItem();
+  commentsListEl.innerHTML = '';
+  if (!item) {
+    commentsListEl.innerHTML = '<p class="comments-empty">Producto no encontrado.</p>';
+    return;
+  }
+  const list = Array.isArray(item.comments) ? item.comments : [];
+  if (!list.length) {
+    commentsListEl.innerHTML = '<p class="comments-empty">Aún no hay comentarios. Añadí el primero abajo.</p>';
+    return;
+  }
+  const sorted = [...list].sort((a, b) => new Date(a.at) - new Date(b.at));
+  sorted.forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'comment-row';
+    const del = document.createElement('button');
+    del.className = 'comment-row-del';
+    del.type = 'button';
+    del.title = 'Eliminar comentario';
+    del.setAttribute('aria-label', 'Eliminar comentario');
+    del.textContent = '×';
+    del.addEventListener('click', () => deleteComment(c.id));
+    const meta = document.createElement('div');
+    meta.className = 'comment-meta';
+    const who = document.createElement('span');
+    who.className = 'comment-author-pill';
+    who.textContent = labelAuthor(c.author || 'me');
+    const when = document.createElement('span');
+    when.textContent = ' ' + formatCommentAt(c.at);
+    meta.appendChild(who);
+    meta.appendChild(when);
+    const textEl = document.createElement('div');
+    textEl.className = 'comment-text';
+    textEl.textContent = c.text;
+    row.appendChild(del);
+    row.appendChild(meta);
+    row.appendChild(textEl);
+    commentsListEl.appendChild(row);
+  });
+}
+
+async function deleteComment(commentId) {
+  if (!commentTargetUrl) return;
+  const res = await fetch('/api/products', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'delete-comment', url: commentTargetUrl, commentId }),
+  });
+  if (res.ok) {
+    ITEMS = await res.json();
+    renderCommentsList();
+    render();
+  } else {
+    const err = await res.json().catch(() => ({}));
+    alert(err.error || 'No se pudo eliminar el comentario');
+  }
+}
+
+commentModalClose.addEventListener('click', closeCommentModal);
+commentModal.addEventListener('click', e => { if (e.target === commentModal) closeCommentModal(); });
+
+commentForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const text = commentText.value.trim();
+  if (!text || !commentTargetUrl) return;
+  commentSubmit.disabled = true;
+  commentSubmit.textContent = 'Enviando…';
+  try {
+    const res = await fetch('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'add-comment',
+        url: commentTargetUrl,
+        text,
+        author: commentAuthor.value,
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    ITEMS = await res.json();
+    localStorage.setItem('apt-comment-author', commentAuthor.value);
+    commentText.value = '';
+    renderCommentsList();
+    render();
+  } catch (err) {
+    alert(err.message || 'Error al añadir comentario');
+  } finally {
+    commentSubmit.disabled = false;
+    commentSubmit.textContent = 'Añadir comentario';
+  }
+});
+
+async function deleteItem(url) {
+  if (!confirm('¿Eliminar este producto?')) return;
+  // POST + JSON body: Vercel/Node often does not parse a body on DELETE, so the API
+  // could never see { url } and delete would always fail in dev/production.
+  const res = await fetch('/api/products', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'delete', url }),
+  });
+  if (res.ok) {
+    ITEMS = await res.json();
+    render();
+  } else {
+    const err = await res.json().catch(() => ({}));
+    console.error('delete failed', res.status, err);
+    alert(err.error || 'No se pudo eliminar (comprueba BLOB_READ_WRITE_TOKEN en Vercel / .env.local).');
+  }
+}
+
 /* ── RENDER ──────────────────────────────────────────────── */
 function render() {
   const categories = [...new Set(ITEMS.map(i => i.cat))];
   const bar        = document.getElementById('js-bar');
   const container  = document.getElementById('js-cats-container');
+
+  bar.querySelectorAll('.pill:not([data-cat="all"])').forEach(b => b.remove());
+  container.innerHTML = '';
 
   document.getElementById('js-total').textContent = ITEMS.length;
   document.getElementById('js-cats').textContent  = categories.length;
@@ -484,7 +902,7 @@ document.getElementById('js-bar').addEventListener('click', e => {
   renderFavSection();
 });
 
-render();
+init();
 </script>
 </body>
 </html>
