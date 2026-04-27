@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Nuevo Apartamento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #F5F1EC;
+      --surface: #FFFFFF;
+      --text:    #1A1512;
+      --muted:   #8A7E76;
+      --border:  #E4DDD5;
+      --accent:  #B85C38;
+      --soft:    #FEF0EA;
+      --sh-sm:   0 1px 3px rgba(26,21,18,.07), 0 1px 2px rgba(26,21,18,.04);
+      --sh-md:   0 4px 16px rgba(26,21,18,.09), 0 2px 6px rgba(26,21,18,.05);
+      --sh-lg:   0 20px 48px rgba(26,21,18,.13), 0 8px 16px rgba(26,21,18,.06);
+      --r: 12px; --r-sm: 8px;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Jost', sans-serif; font-weight: 300; line-height: 1.6; }
+
+    /* ── HERO (reduced) ───────────────────────────────────── */
+    .hero {
+      background: var(--text);
+      color: #fff;
+      padding: 56px 40px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,.07) 1px, transparent 1px);
+      background-size: 22px 22px;
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 25% 60%, rgba(184,92,56,.35) 0%, transparent 55%),
+        radial-gradient(ellipse at 75% 20%, rgba(184,92,56,.18) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .hero-inner { position: relative; z-index: 1; }
+    .hero-eyebrow {
+      font-size: 10px; font-weight: 500; letter-spacing: .22em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(44px, 7vw, 80px);
+      font-weight: 300; line-height: .95; letter-spacing: -.025em; margin-bottom: 20px;
+    }
+    .hero h1 em { font-style: italic; color: #E8937A; }
+    .hero-stats { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; }
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif; font-size: 34px;
+      font-weight: 500; color: var(--accent); line-height: 1;
+    }
+    .stat-label {
+      font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+      color: rgba(255,255,255,.35); margin-top: 3px;
+    }
+
+    /* ── FILTER BAR ───────────────────────────────────────── */
+    .bar-wrap {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(245,241,236,.94);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .bar {
+      max-width: 1240px; margin: 0 auto;
+      padding: 12px 40px;
+      display: flex; gap: 8px;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .bar::-webkit-scrollbar { display: none; }
+    .pill {
+      flex-shrink: 0; padding: 6px 16px;
+      border: 1.5px solid var(--border); border-radius: 100px;
+      background: transparent; font-family: 'Jost', sans-serif;
+      font-size: 12.5px; font-weight: 400; color: var(--muted);
+      cursor: pointer; transition: all .2s ease; white-space: nowrap;
+    }
+    .pill:hover { border-color: var(--accent); color: var(--accent); }
+    .pill.active { background: var(--text); border-color: var(--text); color: #fff; }
+
+    /* ── MAIN ─────────────────────────────────────────────── */
+    .main { max-width: 1240px; margin: 0 auto; padding: 56px 40px 88px; }
+
+    /* ── FAV SECTION ──────────────────────────────────────── */
+    .fav-section { display: none; margin-bottom: 64px; }
+    .fav-section.on { display: block; }
+    .eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+    .eyebrow-label { font-size: 10px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+    .eyebrow-line { flex: 1; height: 1px; background: var(--border); }
+
+    /* ── CATEGORY ─────────────────────────────────────────── */
+    .cat-section { margin-bottom: 64px; }
+    .cat-section.hidden { display: none; }
+    .cat-head {
+      display: flex; align-items: baseline; gap: 12px;
+      margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+    }
+    .cat-icon { font-size: 22px; line-height: 1; }
+    .cat-title { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 400; letter-spacing: -.01em; }
+    .cat-n { font-size: 13px; color: var(--muted); margin-left: auto; flex-shrink: 0; }
+
+    /* ── GRID ─────────────────────────────────────────────── */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 18px; }
+
+    /* ── CARD ─────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      display: flex; flex-direction: column;
+      box-shadow: var(--sh-sm);
+      overflow: hidden;
+      transition: transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .28s ease, border-color .28s ease;
+    }
+    .card:hover { transform: translateY(-5px); box-shadow: var(--sh-lg); border-color: transparent; }
+
+    /* ── CARD IMAGE ───────────────────────────────────────── */
+    .card-thumb {
+      height: 196px;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #EDE7DF 0%, #DDD4C8 100%);
+    }
+    .card-thumb img {
+      width: 100%; height: 100%; object-fit: cover;
+      display: block;
+      transition: transform .4s ease;
+    }
+    .card:hover .card-thumb img { transform: scale(1.04); }
+
+    /* placeholder when no image */
+    .card-thumb.empty {
+      display: flex; align-items: center; justify-content: center;
+    }
+    .thumb-placeholder {
+      font-size: 40px; opacity: .35;
+    }
+
+    /* fav button overlaid on image */
+    .fav-btn {
+      position: absolute; top: 10px; right: 10px;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,.6);
+      background: rgba(255,255,255,.85);
+      backdrop-filter: blur(6px);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; line-height: 1;
+      color: var(--muted);
+      transition: all .2s ease;
+      z-index: 2;
+    }
+    .fav-btn:hover { background: white; border-color: #E8937A; color: var(--accent); }
+    .fav-btn.on { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* ── CARD BODY ────────────────────────────────────────── */
+    .card-body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+    .card-name { font-size: 15px; font-weight: 500; color: var(--text); line-height: 1.35; }
+    .store-badge {
+      display: inline-block; align-self: flex-start;
+      font-size: 11px; font-weight: 500; letter-spacing: .05em;
+      padding: 3px 10px; border-radius: 100px; border: 1px solid;
+    }
+    .card-link {
+      margin-top: auto; align-self: flex-start;
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 500; color: var(--accent);
+      text-decoration: none; padding: 7px 16px;
+      border: 1.5px solid var(--accent); border-radius: var(--r-sm);
+      transition: all .2s ease;
+    }
+    .card-link:hover { background: var(--accent); color: #fff; }
+    .card-link svg { width: 11px; height: 11px; transition: transform .2s ease; }
+    .card-link:hover svg { transform: translate(2px,-2px); }
+
+    /* ── FOOTER ───────────────────────────────────────────── */
+    footer {
+      background: var(--text); color: rgba(255,255,255,.3);
+      text-align: center; padding: 32px 40px;
+      font-size: 13px; letter-spacing: .04em;
+    }
+    footer b { color: var(--accent); font-weight: 400; }
+
+    /* ── RESPONSIVE ───────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .hero { padding: 44px 20px 40px; }
+      .bar { padding: 10px 20px; }
+      .main { padding: 36px 16px 64px; }
+      .hero-stats { gap: 24px; }
+      .grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      .card-thumb { height: 160px; }
+    }
+    @media (max-width: 480px) {
+      .grid { grid-template-columns: 1fr; }
+      .cat-title { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HERO ──────────────────────────────────────────────── -->
+<header class="hero">
+  <div class="hero-inner">
+    <p class="hero-eyebrow">✦ Lista de deseos · 2026</p>
+    <h1>Mi Nuevo <em>Apartamento</em></h1>
+    <div class="hero-stats">
+      <div><div class="stat-num" id="js-total">—</div><div class="stat-label">Productos</div></div>
+      <div><div class="stat-num" id="js-cats">—</div><div class="stat-label">Categorías</div></div>
+      <div><div class="stat-num" id="js-favs">0</div><div class="stat-label">Favoritos</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ── FILTER BAR ─────────────────────────────────────────── -->
+<div class="bar-wrap">
+  <div class="bar" id="js-bar"><button class="pill active" data-cat="all">Todos</button></div>
+</div>
+
+<!-- ── CONTENT ────────────────────────────────────────────── -->
+<main class="main">
+  <section class="fav-section" id="js-fav-section">
+    <div class="eyebrow">
+      <span class="eyebrow-label">♥ &nbsp;Mis favoritos</span>
+      <div class="eyebrow-line"></div>
+    </div>
+    <div class="grid" id="js-fav-grid"></div>
+  </section>
+  <div id="js-cats-container"></div>
+</main>
+
+<footer>Hecho con <b>♥</b> &nbsp;·&nbsp; Mi Nuevo Apartamento &nbsp;·&nbsp; 2026</footer>
+
+<script>
+/* ── DATA ─────────────────────────────────────────────────── */
+const ITEMS = [
+  // Sofás y Asientos
+  { cat:"Sofás y Asientos",    name:"Sofá Sierra 4 Plazas",           store:"Habitat",   img: null,
+    url:"https://www.habitat.net/es/p/sofa-de-4-plazas-de-tela-sierra-terracota" },
+  { cat:"Sofás y Asientos",    name:"Sofá Cama PAOLY Pana",            store:"Sklum",     img:"https://cdn.sklum.com/es/5172832-large_default/sofa-cama-de-2-plazas-en-pana-envasado-al-vacio-paoly.jpg",
+    url:"https://www.sklum.com/es/comprar-sofa-cama/226575-sofa-cama-de-2-plazas-en-pana-envasado-al-vacio-paoly.html" },
+  { cat:"Sofás y Asientos",    name:"4× Sillas ANELA",                 store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/20260211-SesionArame5463copia.jpg?v=1773156486",
+    url:"https://northdeco.com/collections/sillas-de-diseno/products/silla-comedor-anela?variant=55253067694466" },
+  { cat:"Sofás y Asientos",    name:"Folk Pouf Tall & Wide Bundle",    store:"noo.ma",    img:"http://noo.ma/cdn/shop/products/blueberry_black.png?v=1627383917&width=2048",
+    url:"https://noo.ma/fr/collections/furniture/products/folk-tall-wide-bundle?variant=32766289248336" },
+
+  // Mesas de Comedor
+  { cat:"Mesas de Comedor",    name:"Mesa GALA Roble",                 store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/Northdeco_Summer25_1284.jpg?v=1748939638",
+    url:"https://northdeco.com/products/mesa-de-comedor-redonda-extensible-gala?variant=46829938966865" },
+  { cat:"Mesas de Comedor",    name:"Mesa GALA Nogal",                 store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/Northdeco_Summer25_1686_68dfebb4-8d91-4936-8df8-6b52bb40f1b4.jpg?v=1748957218",
+    url:"https://northdeco.com/products/mesa-de-comedor-redonda-extensible-gala-walnut-120-150-cm?pr_prod_strat=e5_desc&pr_rec_id=0d2d94c6d&pr_rec_pid=8857698173265&pr_ref_pid=8645350261073&pr_seq=uniform&variant=47675040039249" },
+
+  // Muebles de TV
+  { cat:"Muebles de TV",       name:"Mueble TV ALTREX Acacia/Inox",   store:"Sklum",     img:"https://cdn.sklum.com/es/5199549-large_default/mueble-tv-en-madera-de-acacia-y-acero-inoxidable-altrex.jpg",
+    url:"https://www.sklum.com/es/comprar-muebles-tv/222200-mueble-tv-en-madera-de-acacia-y-acero-inoxidable-altrex.html?id_c=664775" },
+  { cat:"Muebles de TV",       name:"Mueble TV ALAZNE MDF",            store:"Sklum",     img:"https://cdn.sklum.com/es/4253682-large_default/mueble-tv-180x40-cm-en-mdf-alazne.jpg",
+    url:"https://www.sklum.com/es/comprar-muebles-tv/175312-mueble-tv-180x40-cm-en-mdf-alazne.html?id_c=419152" },
+  { cat:"Muebles de TV",       name:"Mueble TV MICHIGAN Acero",        store:"Sklum",     img:"https://cdn.sklum.com/es/4333950-large_default/mueble-tv-180x40-cm-en-acero-michigan.jpg",
+    url:"https://www.sklum.com/es/comprar-muebles-tv/186426-mueble-tv-180x40-cm-en-acero-michigan.html?id_c=497544" },
+  { cat:"Muebles de TV",       name:"Mueble TV LUENA Inoxidable",      store:"Sklum",     img:"https://cdn.sklum.com/es/5135937-large_default/mueble-tv-180x40-cm-en-acero-inoxidable-luena.jpg",
+    url:"https://www.sklum.com/es/comprar-muebles-tv/227829-mueble-tv-180x40-cm-en-acero-inoxidable-luena.html" },
+
+  // Mesas Auxiliares
+  { cat:"Mesas Auxiliares",    name:"Mesa Centro CORINA Nogal",        store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/Mesa-Corina-CasaJU-Northdeco-ProductoI.jpg?v=1759925419",
+    url:"https://northdeco.com/products/mesa-de-centro-corina-110-x-55-cm?variant=42101022621875" },
+  { cat:"Mesas Auxiliares",    name:"2× Mesas Auxiliares ANDE",        store:"noo.ma",    img:"http://noo.ma/cdn/shop/products/nooma_FUR1350.34-bundle.png?v=1666943767&width=2048",
+    url:"https://noo.ma/fr/collections/furniture/products/2x-ande-side-table?variant=40443080802475" },
+  { cat:"Mesas Auxiliares",    name:"Mesa Auxiliar SAURA Azul",        store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/20260128-SesionEresArte4243.jpg?v=1771240742",
+    url:"https://northdeco.com/collections/mesas-auxiliares/products/mesa-saura?variant=55608925127042" },
+  { cat:"Mesas Auxiliares",    name:"Mesa Auxiliar SAURA Transparente",store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/20260128-SesionEresArte4243.jpg?v=1771240742",
+    url:"https://northdeco.com/collections/mesas-auxiliares/products/mesa-saura?variant=54881572979074" },
+  { cat:"Mesas Auxiliares",    name:"Mesita RILO Azul",                store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/20260211-SesionArame4864copia.jpg?v=1773156172",
+    url:"https://northdeco.com/collections/outlet/products/mesita-auxiliar-rilo-37x46-cm?variant=55081732964738" },
+  { cat:"Mesas Auxiliares",    name:"Mesita RILO Negra",               store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/20260211-SesionArame4864copia.jpg?v=1773156172",
+    url:"https://northdeco.com/collections/outlet/products/mesita-auxiliar-rilo-37x46-cm?variant=49829988270417" },
+  { cat:"Mesas Auxiliares",    name:"Mesa BONET Metal/Cristal",        store:"Northdeco", img: null,
+    url:"https://northdeco.com/collections/mesas-auxiliares/products/mesa-auxiliar-de-metal-y-cristal-bonet?variant=56320834601346" },
+  { cat:"Mesas Auxiliares",    name:"Mesa JOHANNA Cubo Cristal",       store:"Northdeco", img:"http://northdeco.com/cdn/shop/files/Mesa_Johanna_ND-0811-BLUE_03_a3e1a96e-1b70-43e5-9146-48eb24a30da6.jpg?v=1723810080",
+    url:"https://northdeco.com/collections/outlet/products/mesa-de-cristal-cuadrada-johanna-40x40-cm?variant=49063256392017" },
+
+  // Bancos
+  { cat:"Bancos",              name:"Banco RIOLUT Ratán/Madera",       store:"Sklum",     img:"https://cdn.sklum.com/es/2257692-large_default/banco-en-ratan-y-madera-riolut.jpg",
+    url:"https://www.sklum.com/es/comprar-bancos/92041-banco-en-ratan-y-madera-riolut.html" },
+  { cat:"Bancos",              name:"Banco KARVIA Tela/Acacia",        store:"Sklum",     img:"https://cdn.sklum.com/es/4994261-large_default/banco-180-cm-en-madera-de-acacia-y-tela-karvia.jpg",
+    url:"https://www.sklum.com/es/comprar-bancos/200118-banco-180-cm-en-madera-de-acacia-y-tela-karvia.html?id_c=577295" },
+  { cat:"Bancos",              name:"Banco DUBAI Acacia",              store:"Sklum",     img:"https://cdn.sklum.com/es/4851335-large_default/banco-en-madera-de-acacia-dubai.jpg",
+    url:"https://www.sklum.com/es/comprar-bancos/211180-banco-en-madera-de-acacia-dubai.html?id_c=588466" },
+
+  // Almacenaje
+  { cat:"Almacenaje",          name:"Banco Zapatero BRUCK",            store:"The Masie", img:"https://cdn.themasie.com/es/4569007-large_default/banco-zapatero-con-almacenaje-de-acero-laminado-bruck-.jpg",
+    url:"https://www.themasie.com/es/comprar-zapateros/130652-banco-zapatero-con-almacenaje-de-acero-laminado-bruck-.html" },
+  { cat:"Almacenaje",          name:"Vestidor KRAUFORD Bambú",         store:"Sklum",     img:"https://cdn.sklum.com/es/4367991-large_default/vestidor-abierto-en-madera-de-bambu-krauford.jpg",
+    url:"https://www.sklum.com/es/comprar-armarios/100305-vestidor-abierto-en-madera-de-bambu-krauford.html" },
+  { cat:"Almacenaje",          name:"Armario JANINE Acero",            store:"Sklum",     img:"https://cdn.sklum.com/es/4393948-large_default/armario-abierto-con-cajones-en-acero-janine.jpg",
+    url:"https://www.sklum.com/es/comprar-armarios/186380-armario-abierto-con-cajones-en-acero-janine.html" },
+
+  // Dormitorio & Oficina
+  { cat:"Dormitorio & Oficina",name:"2× Estructura ELLINGE 150×190",  store:"JYSK",      img:"https://cdn1.jysk.com/getimage/wd3.large/236088",
+    url:"https://jysk.es/dormitorio/camas/canapes-somieres-y-estructuras-de-cama/estructuras-de-cama/estructura-cama-ellinge-150x190-almacenaje-roble-calido" },
+  { cat:"Dormitorio & Oficina",name:"Escritorio FLEXISPOT Elevable",   store:"Amazon",    img: null,
+    url:"https://www.amazon.es/dp/B0DMNY2MF4" },
+  { cat:"Dormitorio & Oficina",name:"Alfombra COME Crudo",             store:"Habitat",   img: null,
+    url:"https://www.habitat.net/es/p/alfombra-de-lana-come-crudo" },
+];
+
+const ICONS = {
+  "Sofás y Asientos":    "🛋️",
+  "Mesas de Comedor":   "🍽️",
+  "Muebles de TV":      "📺",
+  "Mesas Auxiliares":   "☕",
+  "Bancos":             "🪑",
+  "Almacenaje":         "🗄️",
+  "Dormitorio & Oficina":"🛏️",
+};
+
+const STORE_STYLE = {
+  "Habitat":   { color:"#5C7A6B", bg:"#EEF6F2" },
+  "Sklum":     { color:"#6B52A0", bg:"#F3EFFA" },
+  "Northdeco": { color:"#3D6887", bg:"#EBF3F9" },
+  "noo.ma":    { color:"#7A6040", bg:"#F8F2E9" },
+  "JYSK":      { color:"#1E5A8E", bg:"#E8F1F9" },
+  "Amazon":    { color:"#B5600A", bg:"#FEF4EB" },
+  "The Masie": { color:"#6B3F7A", bg:"#F6EFF9" },
+};
+
+/* ── FAVORITES ───────────────────────────────────────────── */
+let favs = new Set(JSON.parse(localStorage.getItem('apt-favs') || '[]'));
+const saveFavs = () => localStorage.setItem('apt-favs', JSON.stringify([...favs]));
+
+function toggleFav(id) {
+  favs.has(id) ? favs.delete(id) : favs.add(id);
+  saveFavs();
+  document.getElementById('js-favs').textContent = favs.size;
+  renderFavSection();
+  document.querySelectorAll(`.fav-btn[data-id="${id}"]`).forEach(btn => {
+    btn.classList.toggle('on', favs.has(id));
+    btn.textContent = favs.has(id) ? '♥' : '♡';
+    btn.title = favs.has(id) ? 'Quitar favorito' : 'Añadir a favoritos';
+  });
+}
+
+/* ── CARD FACTORY ────────────────────────────────────────── */
+function makeCard(item, id) {
+  const on = favs.has(id);
+  const st = STORE_STYLE[item.store] || { color:'#666', bg:'#f5f5f5' };
+  const icon = ICONS[item.cat] || '📦';
+
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  // thumb
+  const thumb = document.createElement('div');
+  thumb.className = 'card-thumb' + (item.img ? '' : ' empty');
+
+  if (item.img) {
+    const img = document.createElement('img');
+    img.src = item.img;
+    img.alt = item.name;
+    img.loading = 'lazy';
+    img.onerror = () => {
+      thumb.classList.add('empty');
+      img.replaceWith(makePlaceholder(icon));
+    };
+    thumb.appendChild(img);
+  } else {
+    thumb.appendChild(makePlaceholder(icon));
+  }
+
+  // fav button on top of thumb
+  const favBtn = document.createElement('button');
+  favBtn.className = 'fav-btn' + (on ? ' on' : '');
+  favBtn.dataset.id = id;
+  favBtn.title = on ? 'Quitar favorito' : 'Añadir a favoritos';
+  favBtn.textContent = on ? '♥' : '♡';
+  favBtn.addEventListener('click', () => toggleFav(id));
+  thumb.appendChild(favBtn);
+
+  // body
+  const body = document.createElement('div');
+  body.className = 'card-body';
+  body.innerHTML = `
+    <div class="card-name">${item.name}</div>
+    <span class="store-badge" style="color:${st.color};background:${st.bg};border-color:${st.color}30">${item.store}</span>
+    <a class="card-link" href="${item.url}" target="_blank" rel="noopener noreferrer">
+      Ver producto
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <path d="M1 11L11 1M11 1H4M11 1V8"/>
+      </svg>
+    </a>
+  `;
+
+  card.appendChild(thumb);
+  card.appendChild(body);
+  return card;
+}
+
+function makePlaceholder(icon) {
+  const el = document.createElement('div');
+  el.className = 'thumb-placeholder';
+  el.textContent = icon;
+  return el;
+}
+
+/* ── FAVORITES SECTION ───────────────────────────────────── */
+function renderFavSection() {
+  const section = document.getElementById('js-fav-section');
+  const grid    = document.getElementById('js-fav-grid');
+  grid.innerHTML = '';
+
+  const activeFilter = document.querySelector('.pill.active')?.dataset.cat;
+  const show = favs.size > 0 && activeFilter === 'all';
+  section.classList.toggle('on', show);
+  if (!show) return;
+
+  ITEMS.forEach((item, id) => {
+    if (favs.has(id)) grid.appendChild(makeCard(item, id));
+  });
+}
+
+/* ── RENDER ──────────────────────────────────────────────── */
+function render() {
+  const categories = [...new Set(ITEMS.map(i => i.cat))];
+  const bar        = document.getElementById('js-bar');
+  const container  = document.getElementById('js-cats-container');
+
+  document.getElementById('js-total').textContent = ITEMS.length;
+  document.getElementById('js-cats').textContent  = categories.length;
+  document.getElementById('js-favs').textContent  = favs.size;
+
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'pill'; btn.dataset.cat = cat;
+    btn.textContent = `${ICONS[cat] || '·'} ${cat}`;
+    bar.appendChild(btn);
+  });
+
+  categories.forEach(cat => {
+    const catItems = ITEMS.filter(i => i.cat === cat);
+    const sec = document.createElement('section');
+    sec.className = 'cat-section'; sec.dataset.cat = cat;
+    sec.innerHTML = `
+      <div class="cat-head">
+        <span class="cat-icon">${ICONS[cat] || '📦'}</span>
+        <h2 class="cat-title">${cat}</h2>
+        <span class="cat-n">${catItems.length} ${catItems.length === 1 ? 'producto' : 'productos'}</span>
+      </div>
+      <div class="grid"></div>
+    `;
+    const grid = sec.querySelector('.grid');
+    catItems.forEach(item => grid.appendChild(makeCard(item, ITEMS.indexOf(item))));
+    container.appendChild(sec);
+  });
+
+  renderFavSection();
+}
+
+/* ── FILTER ──────────────────────────────────────────────── */
+document.getElementById('js-bar').addEventListener('click', e => {
+  const btn = e.target.closest('.pill');
+  if (!btn) return;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  const cat = btn.dataset.cat;
+  document.querySelectorAll('.cat-section').forEach(s => s.classList.toggle('hidden', cat !== 'all' && s.dataset.cat !== cat));
+  renderFavSection();
+});
+
+render();
+</script>
+</body>
+</html>
