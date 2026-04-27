@@ -5,7 +5,7 @@
 import { execFile } from 'child_process';
 
 const ITEMS = [
-  { name:"Sofá Sierra 4 Plazas",          url:"https://www.habitat.net/es/p/sofa-de-4-plazas-de-tela-sierra-terracota" },
+  { name:"Sofá Sierra 4 Plazas",          url:"https://www.habitat-design.com/es-es/p/sierra-sofa-4-plazas-de-tejido-kumal-con-relleno-de-plumas-azul-marino" },
   { name:"Sofá Cama PAOLY Pana",           url:"https://www.sklum.com/es/comprar-sofa-cama/226575-sofa-cama-de-2-plazas-en-pana-envasado-al-vacio-paoly.html" },
   { name:"4× Sillas ANELA",               url:"https://northdeco.com/collections/sillas-de-diseno/products/silla-comedor-anela?variant=55253067694466" },
   { name:"Folk Pouf Tall & Wide Bundle",  url:"https://noo.ma/fr/collections/furniture/products/folk-tall-wide-bundle?variant=32766289248336" },
@@ -31,7 +31,7 @@ const ITEMS = [
   { name:"Armario JANINE Acero",          url:"https://www.sklum.com/es/comprar-armarios/186380-armario-abierto-con-cajones-en-acero-janine.html" },
   { name:"2× Estructura ELLINGE 150×190", url:"https://jysk.es/dormitorio/camas/canapes-somieres-y-estructuras-de-cama/estructuras-de-cama/estructura-cama-ellinge-150x190-almacenaje-roble-calido" },
   { name:"Escritorio FLEXISPOT Elevable", url:"https://www.amazon.es/dp/B0DMNY2MF4" },
-  { name:"Alfombra COME Crudo",           url:"https://www.habitat.net/es/p/alfombra-de-lana-come-crudo" },
+  { name:"Alfombra COME Crudo",           url:"https://www.habitat-design.com/es-es/p/come-alfombra-de-lana-con-acabado-tufte-170-x-240-cm-crudo-design-by-floriane-jacques" },
 ];
 
 /** Fetch the first 200 KB of a URL via curl (handles gzip/br natively). */
