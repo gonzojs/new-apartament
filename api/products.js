@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { put, list, del } from '@vercel/blob';
+import { text as streamToText } from 'node:stream/consumers';
+import { get, put, list, del } from '@vercel/blob';
 
 const PRODUCTS_PATH = 'products.json';
 /** Prefix for list/del: matches pathname `products.json` (Vercel matches pathnames that start with this). */
@@ -103,20 +104,55 @@ function copySeed() {
   return JSON.parse(JSON.stringify(SEED));
 }
 
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+/** Canonical URL for matching product url fields (avoids href vs stored string drift). */
+function normalizeUrl(u) {
+  try {
+    return new URL(u).href;
+  } catch {
+    return u;
+  }
+}
+
+function findProductByUrl(products, productUrl) {
+  const want = normalizeUrl(productUrl);
+  return products.find((x) => normalizeUrl(x.url) === want);
+}
+
 /**
- * Read latest `products.json` from Blob. We use `list` + public URL + `cache: 'no-store'`
- * instead of `get(pathname)`: the SDK’s `get(..., { useCache: false })` adds `?cache=0`
- * and the storage API can respond with 400. Plain `get()` without that can also be picky
- * in some environments; `list` + `fetch` matches how the blob is stored.
+ * Read latest `products.json` from Blob.
+ * 1) Prefer `get(pathname)` — same auth as `put`, avoids stale CDN on the public `fetch()` URL.
+ * 2) Do not use `get(..., { useCache: false })` — the `?cache=0` query can 400.
+ * 3) Fallback: `list` + public URL with a cache-bust query + `no-store` fetch.
  */
 async function readProductsFromBlob() {
+  try {
+    const out = await get(PRODUCTS_PATH, {
+      access: 'public',
+      token: BLOB_READ_WRITE_TOKEN,
+    });
+    if (out) {
+      const raw = await streamToText(out.stream);
+      return JSON.parse(raw);
+    }
+  } catch (e) {
+    console.error('[readProductsFromBlob] get', e?.message || e);
+  }
   const { blobs } = await list({ prefix: BLOB_LIST_PREFIX, token: BLOB_READ_WRITE_TOKEN });
   const forFile = blobs.filter(b => b.pathname === PRODUCTS_PATH);
   if (!forFile.length) {
     return null;
   }
   const sorted = [...forFile].sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
-  const res = await fetch(sorted[0].url, { cache: 'no-store' });
+  const u = new URL(sorted[0].url);
+  u.searchParams.set('b', String(Date.now()));
+  const res = await fetch(u, {
+    cache: 'no-store',
+    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+  });
   if (res.status === 404) {
     return null;
   }
@@ -210,8 +246,8 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: 'url and text required' });
         }
         const author = body.author === 'designer' ? 'designer' : 'me';
-        const products = await getProducts();
-        const p = products.find((x) => x.url === productUrl);
+        const products = deepClone(await getProducts());
+        const p = findProductByUrl(products, productUrl);
         if (!p) {
           return res.status(404).json({ error: 'product not found' });
         }
@@ -235,16 +271,17 @@ export default async function handler(req, res) {
           });
         }
         const productUrl = body.url;
-        const { commentId } = body;
-        if (!productUrl || !commentId) {
+        const commentId = body.commentId;
+        if (!productUrl || commentId == null || commentId === '') {
           return res.status(400).json({ error: 'url and commentId required' });
         }
-        const products = await getProducts();
-        const p = products.find((x) => x.url === productUrl);
+        const idNeedle = String(commentId);
+        const products = deepClone(await getProducts());
+        const p = findProductByUrl(products, productUrl);
         if (!p || !Array.isArray(p.comments)) {
           return res.status(404).json({ error: 'not found' });
         }
-        const next = p.comments.filter((c) => c.id !== commentId);
+        const next = p.comments.filter((c) => String(c.id) !== idNeedle);
         if (next.length === p.comments.length) {
           return res.status(404).json({ error: 'comment not found' });
         }

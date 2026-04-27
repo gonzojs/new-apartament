@@ -176,10 +176,18 @@
     /* ── CARD BODY ────────────────────────────────────────── */
     .card-body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
     .card-name { font-size: 15px; font-weight: 500; color: var(--text); line-height: 1.35; }
+    .card-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      width: 100%;
+    }
     .store-badge {
-      display: inline-block; align-self: flex-start;
+      display: inline-block;
       font-size: 11px; font-weight: 500; letter-spacing: .05em;
       padding: 3px 10px; border-radius: 100px; border: 1px solid;
+      flex-shrink: 0;
     }
     .card-link {
       margin-top: auto; align-self: flex-start;
@@ -310,26 +318,24 @@
     .delete-btn:hover { background: rgba(184,92,56,.9); }
 
     .comment-btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      margin-top: 2px;
-      padding: 8px 14px;
-      font-size: 12.5px; font-weight: 500;
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+      padding: 5px 10px;
       color: var(--muted);
       background: var(--bg);
       border: 1.5px solid var(--border);
-      border-radius: var(--r-sm);
+      border-radius: 100px;
       cursor: pointer;
       font-family: 'Jost', sans-serif;
-      transition: border-color .2s, color .2s;
-      align-self: flex-start;
+      font-size: 12px; font-weight: 600;
+      transition: border-color .2s, color .2s, background .2s;
+      flex-shrink: 0;
     }
-    .comment-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .comment-badge {
-      min-width: 20px; height: 20px; padding: 0 6px;
-      border-radius: 100px; background: var(--soft);
-      color: var(--accent); font-size: 11px; font-weight: 600;
-      display: inline-flex; align-items: center; justify-content: center;
+    .comment-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--soft); }
+    .comment-btn .comment-icon {
+      width: 18px; height: 18px;
+      flex-shrink: 0;
     }
+    .comment-btn .comment-count { line-height: 1; min-width: 0.5em; }
     .comments-scroll {
       max-height: min(240px, 40vh);
       overflow-y: auto;
@@ -549,13 +555,18 @@ function makeCard(item, id) {
   // body
   const body = document.createElement('div');
   body.className = 'card-body';
+  const ariaComments = nComments === 1 ? '1 comentario' : `${nComments} comentarios`;
   body.innerHTML = `
     <div class="card-name">${item.name}</div>
-    <span class="store-badge" style="color:${st.color};background:${st.bg};border-color:${st.color}30">${item.store}</span>
-    <button type="button" class="comment-btn" aria-label="Comentarios del producto">
-      <span>Comentarios</span>
-      ${nComments ? `<span class="comment-badge">${nComments}</span>` : ''}
-    </button>
+    <div class="card-meta-row">
+      <span class="store-badge" style="color:${st.color};background:${st.bg};border-color:${st.color}30">${item.store}</span>
+      <button type="button" class="comment-btn" title="Comentarios" aria-label="Comentarios: ${ariaComments}">
+        <svg class="comment-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span class="comment-count">${nComments}</span>
+      </button>
+    </div>
     <a class="card-link" href="${item.url}" target="_blank" rel="noopener noreferrer">
       Ver producto
       <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
