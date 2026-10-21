@@ -1,0 +1,14 @@
+work
+node_modules
+.git
+.env*
+tests
+test-results
+playwright-report
+playwright.config.js
+scripts/local-db.mjs
+scripts/test-server.mjs
+scripts/dev.mjs
+scripts/migrate.mjs
+scripts/verify-stores.mjs
+supabase
