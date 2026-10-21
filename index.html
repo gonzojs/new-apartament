@@ -1,919 +1,293 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mi Nuevo Apartamento</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg:      #F5F1EC;
-      --surface: #FFFFFF;
-      --text:    #1A1512;
-      --muted:   #8A7E76;
-      --border:  #E4DDD5;
-      --accent:  #B85C38;
-      --soft:    #FEF0EA;
-      --sh-sm:   0 1px 3px rgba(26,21,18,.07), 0 1px 2px rgba(26,21,18,.04);
-      --sh-md:   0 4px 16px rgba(26,21,18,.09), 0 2px 6px rgba(26,21,18,.05);
-      --sh-lg:   0 20px 48px rgba(26,21,18,.13), 0 8px 16px rgba(26,21,18,.06);
-      --r: 12px; --r-sm: 8px;
-    }
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body { background: var(--bg); color: var(--text); font-family: 'Jost', sans-serif; font-weight: 300; line-height: 1.6; }
-
-    /* ── HERO (reduced) ───────────────────────────────────── */
-    .hero {
-      background: var(--text);
-      color: #fff;
-      padding: 56px 40px 48px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(circle, rgba(255,255,255,.07) 1px, transparent 1px);
-      background-size: 22px 22px;
-      pointer-events: none;
-    }
-    .hero::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse at 25% 60%, rgba(184,92,56,.35) 0%, transparent 55%),
-        radial-gradient(ellipse at 75% 20%, rgba(184,92,56,.18) 0%, transparent 50%);
-      pointer-events: none;
-    }
-    .hero-inner { position: relative; z-index: 1; }
-    .hero-eyebrow {
-      font-size: 10px; font-weight: 500; letter-spacing: .22em;
-      text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
-    }
-    .hero h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(44px, 7vw, 80px);
-      font-weight: 300; line-height: .95; letter-spacing: -.025em; margin-bottom: 20px;
-    }
-    .hero h1 em { font-style: italic; color: #E8937A; }
-    .hero-stats { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; }
-    .stat-num {
-      font-family: 'Cormorant Garamond', serif; font-size: 34px;
-      font-weight: 500; color: var(--accent); line-height: 1;
-    }
-    .stat-label {
-      font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
-      color: rgba(255,255,255,.35); margin-top: 3px;
-    }
-
-    /* ── FILTER BAR ───────────────────────────────────────── */
-    .bar-wrap {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(245,241,236,.94);
-      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--border);
-    }
-    .bar {
-      max-width: 1240px; margin: 0 auto;
-      padding: 12px 40px;
-      display: flex; gap: 8px;
-      overflow-x: auto; scrollbar-width: none;
-    }
-    .bar::-webkit-scrollbar { display: none; }
-    .pill {
-      flex-shrink: 0; padding: 6px 16px;
-      border: 1.5px solid var(--border); border-radius: 100px;
-      background: transparent; font-family: 'Jost', sans-serif;
-      font-size: 12.5px; font-weight: 400; color: var(--muted);
-      cursor: pointer; transition: all .2s ease; white-space: nowrap;
-    }
-    .pill:hover { border-color: var(--accent); color: var(--accent); }
-    .pill.active { background: var(--text); border-color: var(--text); color: #fff; }
-
-    /* ── MAIN ─────────────────────────────────────────────── */
-    .main { max-width: 1240px; margin: 0 auto; padding: 56px 40px 88px; }
-
-    /* ── FAV SECTION ──────────────────────────────────────── */
-    .fav-section { display: none; margin-bottom: 64px; }
-    .fav-section.on { display: block; }
-    .eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
-    .eyebrow-label { font-size: 10px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
-    .eyebrow-line { flex: 1; height: 1px; background: var(--border); }
-
-    /* ── CATEGORY ─────────────────────────────────────────── */
-    .cat-section { margin-bottom: 64px; }
-    .cat-section.hidden { display: none; }
-    .cat-head {
-      display: flex; align-items: baseline; gap: 12px;
-      margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
-    }
-    .cat-icon { font-size: 22px; line-height: 1; }
-    .cat-title { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 400; letter-spacing: -.01em; }
-    .cat-n { font-size: 13px; color: var(--muted); margin-left: auto; flex-shrink: 0; }
-
-    /* ── GRID ─────────────────────────────────────────────── */
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 18px; }
-
-    /* ── CARD ─────────────────────────────────────────────── */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      display: flex; flex-direction: column;
-      box-shadow: var(--sh-sm);
-      overflow: hidden;
-      transition: transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .28s ease, border-color .28s ease;
-    }
-    .card:hover { transform: translateY(-5px); box-shadow: var(--sh-lg); border-color: transparent; }
-
-    /* ── CARD IMAGE ───────────────────────────────────────── */
-    .card-thumb {
-      height: 196px;
-      flex-shrink: 0;
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(135deg, #EDE7DF 0%, #DDD4C8 100%);
-    }
-    .card-thumb img {
-      width: 100%; height: 100%; object-fit: cover;
-      display: block;
-      transition: transform .4s ease;
-    }
-    .card:hover .card-thumb img { transform: scale(1.04); }
-
-    /* placeholder when no image */
-    .card-thumb.empty {
-      display: flex; align-items: center; justify-content: center;
-    }
-    .thumb-placeholder {
-      font-size: 40px; opacity: .35;
-    }
-
-    /* fav button overlaid on image */
-    .fav-btn {
-      position: absolute; top: 10px; right: 10px;
-      width: 34px; height: 34px;
-      border-radius: 50%;
-      border: 1.5px solid rgba(255,255,255,.6);
-      background: rgba(255,255,255,.85);
-      backdrop-filter: blur(6px);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; line-height: 1;
-      color: var(--muted);
-      transition: all .2s ease;
-      z-index: 2;
-    }
-    .fav-btn:hover { background: white; border-color: #E8937A; color: var(--accent); }
-    .fav-btn.on { background: var(--accent); border-color: var(--accent); color: white; }
-
-    /* ── CARD BODY ────────────────────────────────────────── */
-    .card-body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
-    .card-name { font-size: 15px; font-weight: 500; color: var(--text); line-height: 1.35; }
-    .card-meta-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      width: 100%;
-    }
-    .store-badge {
-      display: inline-block;
-      font-size: 11px; font-weight: 500; letter-spacing: .05em;
-      padding: 3px 10px; border-radius: 100px; border: 1px solid;
-      flex-shrink: 0;
-    }
-    .card-link {
-      margin-top: auto; align-self: flex-start;
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 13px; font-weight: 500; color: var(--accent);
-      text-decoration: none; padding: 7px 16px;
-      border: 1.5px solid var(--accent); border-radius: var(--r-sm);
-      transition: all .2s ease;
-    }
-    .card-link:hover { background: var(--accent); color: #fff; }
-    .card-link svg { width: 11px; height: 11px; transition: transform .2s ease; }
-    .card-link:hover svg { transform: translate(2px,-2px); }
-
-    /* ── FOOTER ───────────────────────────────────────────── */
-    footer {
-      background: var(--text); color: rgba(255,255,255,.3);
-      text-align: center; padding: 32px 40px;
-      font-size: 13px; letter-spacing: .04em;
-    }
-    footer b { color: var(--accent); font-weight: 400; }
-
-    /* ── RESPONSIVE ───────────────────────────────────────── */
-    @media (max-width: 768px) {
-      .hero { padding: 44px 20px 40px; }
-      .bar { padding: 10px 20px; }
-      .main { padding: 36px 16px 64px; }
-      .hero-stats { gap: 24px; }
-      .grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
-      .card-thumb { height: 160px; }
-    }
-    @media (max-width: 480px) {
-      .grid { grid-template-columns: 1fr; }
-      .cat-title { font-size: 28px; }
-    }
-
-    /* ── FAB ──────────────────────────────────────────────── */
-    .fab {
-      position: fixed; bottom: 28px; right: 28px; z-index: 900;
-      width: 52px; height: 52px; border-radius: 50%;
-      background: var(--accent); color: #fff;
-      border: none; font-size: 26px; line-height: 1;
-      cursor: pointer;
-      box-shadow: 0 4px 20px rgba(184,92,56,.4);
-      display: flex; align-items: center; justify-content: center;
-      transition: transform .15s, box-shadow .15s;
-    }
-    .fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(184,92,56,.5); }
-
-    /* ── MODAL ────────────────────────────────────────────── */
-    .modal-overlay {
-      position: fixed; inset: 0; z-index: 1000;
-      background: rgba(26,21,18,.55);
-      display: flex; align-items: center; justify-content: center;
-      padding: 16px;
-      backdrop-filter: blur(4px);
-    }
-    .modal-overlay.hidden { display: none; }
-    .modal {
-      background: var(--surface); border-radius: var(--r);
-      padding: 32px; width: 100%; max-width: 480px;
-      box-shadow: var(--sh-lg); position: relative;
-      max-height: 90vh; overflow-y: auto;
-    }
-    .modal-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 24px; font-weight: 400; margin-bottom: 24px;
-    }
-    .modal-close {
-      position: absolute; top: 16px; right: 16px;
-      background: none; border: none; cursor: pointer;
-      font-size: 22px; color: var(--muted);
-      width: 32px; height: 32px;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 50%; transition: background .15s, color .15s;
-    }
-    .modal-close:hover { background: var(--border); color: var(--text); }
-    .form-group { margin-bottom: 16px; }
-    .form-label {
-      display: block; font-size: 11px; font-weight: 500;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 6px;
-    }
-    .form-input, .form-select {
-      width: 100%; padding: 10px 14px;
-      border: 1.5px solid var(--border); border-radius: var(--r-sm);
-      font-family: 'Jost', sans-serif; font-size: 14px; font-weight: 300;
-      color: var(--text); background: var(--bg);
-      transition: border-color .15s; outline: none;
-    }
-    .form-input:focus, .form-select:focus { border-color: var(--accent); }
-    textarea.form-input { min-height: 88px; resize: vertical; }
-    .preview-card {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px; background: var(--bg);
-      border-radius: var(--r-sm); border: 1.5px solid var(--border);
-      margin-bottom: 16px;
-    }
-    .preview-thumb {
-      width: 56px; height: 56px; border-radius: 6px;
-      object-fit: cover; flex-shrink: 0; background: var(--border);
-    }
-    .preview-info { font-size: 13px; color: var(--muted); line-height: 1.4; }
-    .btn-submit {
-      width: 100%; padding: 12px;
-      background: var(--accent); color: #fff;
-      border: none; border-radius: var(--r-sm);
-      font-family: 'Jost', sans-serif; font-size: 14px;
-      font-weight: 500; letter-spacing: .06em;
-      cursor: pointer; transition: opacity .15s; margin-top: 8px;
-    }
-    .btn-submit:hover { opacity: .88; }
-    .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
-    .form-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
-    .loading-state {
-      text-align: center; padding: 60px 20px;
-      color: var(--muted); font-size: 14px;
-    }
-    .delete-btn {
-      position: absolute; top: 8px; left: 8px; z-index: 2;
-      background: rgba(26,21,18,.6); color: #fff;
-      border: none; border-radius: 50%;
-      width: 26px; height: 26px; font-size: 14px;
-      cursor: pointer; display: none;
-      align-items: center; justify-content: center;
-      transition: background .15s;
-    }
-    .card:hover .delete-btn { display: flex; }
-    .delete-btn:hover { background: rgba(184,92,56,.9); }
-
-    .comment-btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
-      padding: 5px 10px;
-      color: var(--muted);
-      background: var(--bg);
-      border: 1.5px solid var(--border);
-      border-radius: 100px;
-      cursor: pointer;
-      font-family: 'Jost', sans-serif;
-      font-size: 12px; font-weight: 600;
-      transition: border-color .2s, color .2s, background .2s;
-      flex-shrink: 0;
-    }
-    .comment-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--soft); }
-    .comment-btn .comment-icon {
-      width: 18px; height: 18px;
-      flex-shrink: 0;
-    }
-    .comment-btn .comment-count { line-height: 1; min-width: 0.5em; }
-    .comments-scroll {
-      max-height: min(240px, 40vh);
-      overflow-y: auto;
-      margin-bottom: 20px;
-      padding: 4px 2px;
-      display: flex; flex-direction: column; gap: 12px;
-    }
-    .comment-row {
-      padding: 12px 14px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--r-sm);
-      position: relative;
-    }
-    .comment-meta {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 8px; margin-bottom: 8px;
-      font-size: 11px; color: var(--muted);
-    }
-    .comment-author-pill {
-      font-weight: 500; text-transform: uppercase; letter-spacing: .06em;
-      color: var(--accent);
-    }
-    .comment-text { font-size: 14px; line-height: 1.45; color: var(--text); }
-    .comment-row-del {
-      position: absolute; top: 8px; right: 8px;
-      width: 24px; height: 24px; border: none; border-radius: 50%;
-      background: transparent; color: var(--muted); cursor: pointer;
-      font-size: 16px; line-height: 1; opacity: .6;
-    }
-    .comment-row:hover .comment-row-del { opacity: 1; }
-    .comment-row-del:hover { color: var(--accent); }
-    .comments-empty { font-size: 13px; color: var(--muted); text-align: center; padding: 16px; }
-  </style>
-</head>
-<body>
-
-<!-- ── HERO ──────────────────────────────────────────────── -->
-<header class="hero">
-  <div class="hero-inner">
-    <p class="hero-eyebrow">✦ Lista de deseos · 2026</p>
-    <h1>Mi Nuevo <em>Apartamento</em></h1>
-    <div class="hero-stats">
-      <div><div class="stat-num" id="js-total">—</div><div class="stat-label">Productos</div></div>
-      <div><div class="stat-num" id="js-cats">—</div><div class="stat-label">Categorías</div></div>
-      <div><div class="stat-num" id="js-favs">0</div><div class="stat-label">Favoritos</div></div>
-    </div>
-  </div>
-</header>
-
-<!-- ── FILTER BAR ─────────────────────────────────────────── -->
-<div class="bar-wrap">
-  <div class="bar" id="js-bar"><button class="pill active" data-cat="all">Todos</button></div>
-</div>
-
-<!-- ── CONTENT ────────────────────────────────────────────── -->
-<main class="main">
-  <section class="fav-section" id="js-fav-section">
-    <div class="eyebrow">
-      <span class="eyebrow-label">♥ &nbsp;Mis favoritos</span>
-      <div class="eyebrow-line"></div>
-    </div>
-    <div class="grid" id="js-fav-grid"></div>
-  </section>
-  <div id="js-cats-container"></div>
-</main>
-
-<!-- ── FAB ──────────────────────────────────────────────── -->
-<button class="fab" id="js-fab" title="Añadir producto" aria-label="Añadir producto">+</button>
-
-<!-- ── ADD MODAL ─────────────────────────────────────────── -->
-<div class="modal-overlay hidden" id="js-modal" role="dialog" aria-modal="true">
-  <div class="modal">
-    <button class="modal-close" id="js-modal-close" aria-label="Cerrar">×</button>
-    <h2 class="modal-title">Añadir <em>Producto</em></h2>
-    <form id="js-add-form" novalidate>
-      <div class="form-group">
-        <label class="form-label" for="add-url">URL del Producto</label>
-        <input class="form-input" type="url" id="add-url" placeholder="https://northdeco.com/..." required>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#F5F1EC" />
+    <meta
+      name="description"
+      content="Una selección personal para construir un hogar. Productos, ideas y precios en un solo lugar."
+    />
+    <title>Mi Nuevo Apartamento</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/web/styles.css" />
+    <script type="module" src="/web/app.js"></script>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-inner">
+        <div class="topline">
+          <span class="brand">UN HOGAR, POCO A POCO</span
+          ><button id="access" class="ghost">Administrar</button>
+        </div>
+        <p class="hero-eyebrow">IDEAS QUE SE CONVIERTEN EN HOGAR</p>
+        <h1>Mi Nuevo <em>Apartamento</em></h1>
+        <p class="intro">
+          Un lugar para guardar lo que me gusta, comparar y elegir con calma.
+        </p>
+        <div id="summary" class="summary" aria-live="polite"></div>
       </div>
-      <div id="js-preview-wrap"></div>
-      <div class="form-group">
-        <label class="form-label" for="add-name">Nombre</label>
-        <input class="form-input" type="text" id="add-name" placeholder="Mesa SAURA Azul" required>
+    </header>
+    <nav class="navigation" aria-label="Secciones">
+      <div class="nav-inner">
+        <button id="tab-list" class="tab active" aria-pressed="true">
+          Mi lista</button
+        ><button id="tab-discover" class="tab" aria-pressed="false">
+          Descubrir productos</button
+        ><span class="spacer"></span
+        ><button id="add" class="primary" hidden>+ Añadir enlace</button>
       </div>
-      <div class="form-group">
-        <label class="form-label" for="add-cat">Categoría</label>
-        <select class="form-select" id="add-cat">
-          <option value="Sofás y Asientos">🛋️ Sofás y Asientos</option>
-          <option value="Mesas de Comedor">🍽️ Mesas de Comedor</option>
-          <option value="Muebles de TV">📺 Muebles de TV</option>
-          <option value="Mesas Auxiliares" selected>☕ Mesas Auxiliares</option>
-          <option value="Bancos">🪑 Bancos</option>
-          <option value="Almacenaje">🗄️ Almacenaje</option>
-          <option value="Dormitorio &amp; Oficina">🛏️ Dormitorio &amp; Oficina</option>
-        </select>
+    </nav>
+    <main class="main">
+      <section id="list-view" aria-labelledby="list-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow-label">LA SELECCIÓN</p>
+            <h2 id="list-heading">Cada pieza, su lugar.</h2>
+          </div>
+          <span id="list-count" class="muted"></span>
+        </div>
+        <div class="filters">
+          <label class="wide"
+            >Buscar en mi lista<input
+              id="filter-text"
+              type="search"
+              placeholder="Nombre, tienda o habitación…"
+          /></label>
+          <label
+            >Estado<select id="filter-status">
+              <option value="">Todos los estados</option>
+              <option value="interested">Me interesa</option>
+              <option value="chosen">Elegido</option>
+              <option value="purchased">Comprado</option>
+              <option value="discarded">Descartado</option>
+            </select></label
+          >
+          <label
+            >Categoría<select id="filter-cat">
+              <option value="">Todas las categorías</option>
+            </select></label
+          >
+          <label
+            >Habitación<select id="filter-room">
+              <option value="">Todas las habitaciones</option>
+            </select></label
+          >
+          <label
+            >Ordenar<select id="filter-sort">
+              <option value="recent">Más recientes</option>
+              <option value="price">Precio: menor primero</option>
+              <option value="name">Nombre</option>
+            </select></label
+          >
+          <label class="check"
+            ><input id="filter-favorite" type="checkbox" /> Solo
+            favoritos</label
+          >
+        </div>
+        <p id="legacy-notice" class="notice" hidden>
+          Los favoritos de la versión anterior usaban posiciones que podían
+          cambiar. Revisa tus productos y vuelve a marcarlos para sincronizarlos
+          de forma segura.
+        </p>
+        <div id="products" class="grid" aria-live="polite">
+          <p class="empty">Cargando tu selección…</p>
+        </div>
+      </section>
+      <section id="discover-view" hidden aria-labelledby="discover-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow-label">ENCUENTRA TU PRÓXIMA PIEZA</p>
+            <h2 id="discover-heading">Muchas tiendas. Una búsqueda.</h2>
+          </div>
+        </div>
+        <p id="search-lock" class="notice">
+          Introduce la clave de administrador para buscar en tiendas y guardar
+          productos.
+        </p>
+        <form id="search-form" class="search-form">
+          <label class="wide"
+            >¿Qué estás buscando?<input
+              id="search-query"
+              type="search"
+              minlength="2"
+              maxlength="120"
+              required
+              placeholder="Una mesa de comedor, una lámpara…" /></label
+          ><button class="primary" id="search-submit">Buscar en tiendas</button>
+        </form>
+        <div class="filters">
+          <label
+            >Tienda<select id="search-store">
+              <option value="">Todas las tiendas</option>
+            </select></label
+          ><label
+            >Precio máximo (€)<input
+              type="number"
+              id="search-max"
+              min="0"
+              step="1"
+              placeholder="Sin límite" /></label
+          ><label
+            >Ordenar<select id="search-sort">
+              <option value="relevance">Relevancia</option>
+              <option value="price">Precio: menor primero</option>
+            </select></label
+          >
+        </div>
+        <p class="muted">
+          Precios para España · EUR · Envío y cupones no incluidos. Confirma el
+          precio final en la tienda.
+        </p>
+        <div id="search-results" aria-live="polite">
+          <p class="empty">
+            Busca una idea. Los resultados aparecerán a medida que responda cada
+            tienda.
+          </p>
+        </div>
+      </section>
+    </main>
+    <footer>
+      Hecho con calma · Mi Nuevo Apartamento
+      <span id="footer-mode">· Vista pública</span>
+    </footer>
+    <div id="toast" role="status" hidden></div>
+    <dialog id="login-dialog">
+      <form id="login-form" class="dialog-content">
+        <button type="button" class="close" data-close aria-label="Cerrar">
+          ×
+        </button>
+        <p class="eyebrow-label">TU ESPACIO</p>
+        <h2>Administrar la selección</h2>
+        <p>La lista es pública. Solo tú puedes modificarla con tu clave.</p>
+        <label
+          >Clave de administrador<input
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required
+            maxlength="200"
+        /></label>
+        <p class="form-error" role="alert"></p>
+        <button class="primary" type="submit">Entrar</button>
+      </form>
+    </dialog>
+    <dialog id="editor-dialog">
+      <form id="editor-form" class="dialog-content">
+        <button type="button" class="close" data-close aria-label="Cerrar">
+          ×
+        </button>
+        <h2 id="editor-title">Añadir producto</h2>
+        <label
+          >Enlace del producto<input
+            name="url"
+            type="url"
+            required
+            maxlength="2048"
+            placeholder="https://…"
+        /></label>
+        <div class="inline">
+          <button type="button" id="preview" class="secondary">
+            Obtener información</button
+          ><span id="preview-status" class="muted" role="status"></span>
+        </div>
+        <label>Nombre<input name="name" required maxlength="200" /></label>
+        <div class="form-grid">
+          <label
+            >Categoría<input
+              name="cat"
+              list="categories"
+              maxlength="80"
+              value="Sin categoría" /></label
+          ><label
+            >Habitación<input
+              name="room"
+              list="rooms"
+              maxlength="80"
+              placeholder="Salón" /></label
+          ><label
+            >Variante / color<input
+              name="variant"
+              maxlength="200"
+              placeholder="La variante del enlace" /></label
+          ><label
+            >Cantidad<input
+              name="quantity"
+              type="number"
+              min="1"
+              max="999"
+              value="1"
+              required /></label
+          ><label
+            >Estado<select name="status">
+              <option value="interested">Me interesa</option>
+              <option value="chosen">Elegido</option>
+              <option value="purchased">Comprado</option>
+              <option value="discarded">Descartado</option>
+            </select></label
+          ><label class="check"
+            ><input name="favorite" type="checkbox" /> Favorito</label
+          >
+        </div>
+        <label class="check"
+          ><input name="manual" type="checkbox" /> Introducir o corregir precio
+          manualmente</label
+        ><label id="manual-price-label" hidden
+          >Precio por producto o pack (€)<input
+            name="price"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="Sin precio"
+        /></label>
+        <p class="muted">
+          Un pack cuenta como un producto. El precio manual se conserva hasta
+          que solicites una actualización.
+        </p>
+        <p class="form-error" role="alert"></p>
+        <button class="primary" type="submit">Guardar producto</button>
+      </form>
+    </dialog>
+    <dialog id="detail-dialog">
+      <div class="dialog-content">
+        <button type="button" class="close" data-close aria-label="Cerrar">
+          ×
+        </button>
+        <div id="detail"></div>
       </div>
-      <div class="form-group">
-        <label class="form-label" for="add-store">Tienda</label>
-        <input class="form-input" type="text" id="add-store" placeholder="Northdeco">
-      </div>
-      <button class="btn-submit" type="submit" id="js-add-submit">Añadir producto</button>
-    </form>
-  </div>
-</div>
-
-<!-- ── COMMENTS MODAL ──────────────────────────────────────── -->
-<div class="modal-overlay hidden" id="js-comment-modal" role="dialog" aria-modal="true">
-  <div class="modal">
-    <button class="modal-close" id="js-comment-modal-close" type="button" aria-label="Cerrar">×</button>
-    <h2 class="modal-title" id="js-comment-modal-title">Comentarios</h2>
-    <div class="comments-scroll" id="js-comments-list" aria-live="polite"></div>
-    <form id="js-comment-form" novalidate>
-      <div class="form-group">
-        <label class="form-label" for="comment-author">Quién escribe</label>
-        <select class="form-select" id="comment-author" name="author">
-          <option value="me">Yo</option>
-          <option value="designer">Diseño</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="comment-text">Nuevo comentario</label>
-        <textarea class="form-input" id="comment-text" rows="3" placeholder="Escribe una nota para este producto…" required></textarea>
-      </div>
-      <button class="btn-submit" type="submit" id="js-comment-submit">Añadir comentario</button>
-    </form>
-  </div>
-</div>
-
-<footer>Hecho con <b>♥</b> &nbsp;·&nbsp; Mi Nuevo Apartamento &nbsp;·&nbsp; 2026</footer>
-
-<script>
-/* ── DATA (loaded from API) ───────────────────────────────── */
-let ITEMS = [];
-
-const ICONS = {
-  "Sofás y Asientos":    "🛋️",
-  "Mesas de Comedor":   "🍽️",
-  "Muebles de TV":      "📺",
-  "Mesas Auxiliares":   "☕",
-  "Bancos":             "🪑",
-  "Almacenaje":         "🗄️",
-  "Dormitorio & Oficina":"🛏️",
-};
-
-const STORE_STYLE = {
-  "Habitat":   { color:"#5C7A6B", bg:"#EEF6F2" },
-  "Sklum":     { color:"#6B52A0", bg:"#F3EFFA" },
-  "Northdeco": { color:"#3D6887", bg:"#EBF3F9" },
-  "noo.ma":    { color:"#7A6040", bg:"#F8F2E9" },
-  "JYSK":      { color:"#1E5A8E", bg:"#E8F1F9" },
-  "Amazon":    { color:"#B5600A", bg:"#FEF4EB" },
-  "The Masie": { color:"#6B3F7A", bg:"#F6EFF9" },
-};
-
-/* ── FAVORITES ───────────────────────────────────────────── */
-let favs = new Set(JSON.parse(localStorage.getItem('apt-favs') || '[]'));
-const saveFavs = () => localStorage.setItem('apt-favs', JSON.stringify([...favs]));
-
-function toggleFav(id) {
-  favs.has(id) ? favs.delete(id) : favs.add(id);
-  saveFavs();
-  document.getElementById('js-favs').textContent = favs.size;
-  renderFavSection();
-  document.querySelectorAll(`.fav-btn[data-id="${id}"]`).forEach(btn => {
-    btn.classList.toggle('on', favs.has(id));
-    btn.textContent = favs.has(id) ? '♥' : '♡';
-    btn.title = favs.has(id) ? 'Quitar favorito' : 'Añadir a favoritos';
-  });
-}
-
-/* ── CARD FACTORY ────────────────────────────────────────── */
-function makeCard(item, id) {
-  const on = favs.has(id);
-  const st = STORE_STYLE[item.store] || { color:'#666', bg:'#f5f5f5' };
-  const icon = ICONS[item.cat] || '📦';
-  const nComments = (item.comments && item.comments.length) || 0;
-
-  const card = document.createElement('div');
-  card.className = 'card';
-
-  // thumb
-  const thumb = document.createElement('div');
-  thumb.className = 'card-thumb' + (item.img ? '' : ' empty');
-
-  if (item.img) {
-    const img = document.createElement('img');
-    img.src = item.img;
-    img.alt = item.name;
-    img.loading = 'lazy';
-    img.onerror = () => {
-      thumb.classList.add('empty');
-      img.replaceWith(makePlaceholder(icon));
-    };
-    thumb.appendChild(img);
-  } else {
-    thumb.appendChild(makePlaceholder(icon));
-  }
-
-  // delete button
-  const delBtn = document.createElement('button');
-  delBtn.className = 'delete-btn';
-  delBtn.title = 'Eliminar';
-  delBtn.textContent = '×';
-  delBtn.addEventListener('click', e => { e.stopPropagation(); deleteItem(item.url); });
-  thumb.appendChild(delBtn);
-
-  // fav button on top of thumb
-  const favBtn = document.createElement('button');
-  favBtn.className = 'fav-btn' + (on ? ' on' : '');
-  favBtn.dataset.id = id;
-  favBtn.title = on ? 'Quitar favorito' : 'Añadir a favoritos';
-  favBtn.textContent = on ? '♥' : '♡';
-  favBtn.addEventListener('click', () => toggleFav(id));
-  thumb.appendChild(favBtn);
-
-  // body
-  const body = document.createElement('div');
-  body.className = 'card-body';
-  const ariaComments = nComments === 1 ? '1 comentario' : `${nComments} comentarios`;
-  body.innerHTML = `
-    <div class="card-name">${item.name}</div>
-    <div class="card-meta-row">
-      <span class="store-badge" style="color:${st.color};background:${st.bg};border-color:${st.color}30">${item.store}</span>
-      <button type="button" class="comment-btn" title="Comentarios" aria-label="Comentarios: ${ariaComments}">
-        <svg class="comment-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-        </svg>
-        <span class="comment-count">${nComments}</span>
-      </button>
-    </div>
-    <a class="card-link" href="${item.url}" target="_blank" rel="noopener noreferrer">
-      Ver producto
-      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-        <path d="M1 11L11 1M11 1H4M11 1V8"/>
-      </svg>
-    </a>
-  `;
-  body.querySelector('.comment-btn').addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    openCommentModal(item);
-  });
-
-  card.appendChild(thumb);
-  card.appendChild(body);
-  return card;
-}
-
-function makePlaceholder(icon) {
-  const el = document.createElement('div');
-  el.className = 'thumb-placeholder';
-  el.textContent = icon;
-  return el;
-}
-
-/* ── FAVORITES SECTION ───────────────────────────────────── */
-function renderFavSection() {
-  const section = document.getElementById('js-fav-section');
-  const grid    = document.getElementById('js-fav-grid');
-  grid.innerHTML = '';
-
-  const activeFilter = document.querySelector('.pill.active')?.dataset.cat;
-  const show = favs.size > 0 && activeFilter === 'all';
-  section.classList.toggle('on', show);
-  if (!show) return;
-
-  ITEMS.forEach((item, id) => {
-    if (favs.has(id)) grid.appendChild(makeCard(item, id));
-  });
-}
-
-/* ── INIT ────────────────────────────────────────────────── */
-async function init() {
-  const container = document.getElementById('js-cats-container');
-  container.innerHTML = '<div class="loading-state">Cargando productos…</div>';
-  try {
-    const res = await fetch('/api/products');
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error || `HTTP ${res.status}`);
-    }
-    ITEMS = await res.json();
-  } catch (e) {
-    container.innerHTML = `<div class="loading-state">Error al cargar productos: ${e.message}<br>Recarga la página.</div>`;
-    return;
-  }
-  render();
-}
-
-/* ── ADD MODAL ───────────────────────────────────────────── */
-const modal       = document.getElementById('js-modal');
-const fab         = document.getElementById('js-fab');
-const modalClose  = document.getElementById('js-modal-close');
-const addForm     = document.getElementById('js-add-form');
-const urlInput    = document.getElementById('add-url');
-const nameInput   = document.getElementById('add-name');
-const storeInput  = document.getElementById('add-store');
-const previewWrap = document.getElementById('js-preview-wrap');
-const submitBtn   = document.getElementById('js-add-submit');
-
-const commentModal       = document.getElementById('js-comment-modal');
-const commentModalClose  = document.getElementById('js-comment-modal-close');
-const commentModalTitle  = document.getElementById('js-comment-modal-title');
-const commentsListEl     = document.getElementById('js-comments-list');
-const commentForm        = document.getElementById('js-comment-form');
-const commentText        = document.getElementById('comment-text');
-const commentAuthor      = document.getElementById('comment-author');
-const commentSubmit      = document.getElementById('js-comment-submit');
-let commentTargetUrl     = null;
-
-function escapeHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-
-fab.addEventListener('click', () => { modal.classList.remove('hidden'); urlInput.focus(); });
-modalClose.addEventListener('click', closeModal);
-modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-document.addEventListener('keydown', e => {
-  if (e.key !== 'Escape') return;
-  if (!commentModal.classList.contains('hidden')) { closeCommentModal(); return; }
-  closeModal();
-});
-
-function closeModal() {
-  modal.classList.add('hidden');
-  addForm.reset();
-  previewWrap.innerHTML = '';
-  submitBtn.disabled = false;
-  submitBtn.textContent = 'Añadir producto';
-}
-
-let previewTimer = null;
-urlInput.addEventListener('input', () => {
-  clearTimeout(previewTimer);
-  previewTimer = setTimeout(() => fetchPreview(urlInput.value.trim()), 700);
-});
-
-async function fetchPreview(url) {
-  if (!url.startsWith('http')) return;
-  previewWrap.innerHTML = '<p class="form-hint">Buscando información…</p>';
-  try {
-    const data = await fetch(`/api/preview?url=${encodeURIComponent(url)}`).then(r => r.json());
-    if (data.title && !nameInput.value) nameInput.value = data.title;
-    if (data.store && !storeInput.value) storeInput.value = data.store;
-    previewWrap.innerHTML = data.img
-      ? `<div class="preview-card"><img class="preview-thumb" src="${data.img}" alt="" onerror="this.style.display='none'"><div class="preview-info">${data.title || url}</div></div>`
-      : '';
-  } catch { previewWrap.innerHTML = ''; }
-}
-
-addForm.addEventListener('submit', async e => {
-  e.preventDefault();
-  const url   = urlInput.value.trim();
-  const name  = nameInput.value.trim();
-  const cat   = document.getElementById('add-cat').value;
-  const store = storeInput.value.trim();
-  if (!url || !name) return;
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Añadiendo…';
-  try {
-    const res = await fetch('/api/products', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, name, cat, store }),
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    ITEMS = await res.json();
-    closeModal();
-    render();
-  } catch {
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Error — Reintentar';
-  }
-});
-
-function getCommentItem() {
-  return ITEMS.find(i => i.url === commentTargetUrl);
-}
-
-function formatCommentAt(iso) {
-  try {
-    return new Date(iso).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' });
-  } catch { return ''; }
-}
-
-function labelAuthor(author) {
-  return author === 'designer' ? 'Diseño' : 'Yo';
-}
-
-function openCommentModal(item) {
-  commentTargetUrl = item.url;
-  commentModalTitle.innerHTML = 'Comentarios <span style="color:var(--muted);font-weight:300;">· ' + escapeHtml(item.name) + '</span>';
-  const saved = localStorage.getItem('apt-comment-author');
-  if (saved === 'designer' || saved === 'me') commentAuthor.value = saved;
-  renderCommentsList();
-  commentText.value = '';
-  commentModal.classList.remove('hidden');
-  setTimeout(() => commentText.focus(), 50);
-}
-
-function closeCommentModal() {
-  commentModal.classList.add('hidden');
-  commentTargetUrl = null;
-  commentForm.reset();
-  const saved = localStorage.getItem('apt-comment-author');
-  if (saved === 'designer' || saved === 'me') commentAuthor.value = saved;
-}
-
-function renderCommentsList() {
-  const item = getCommentItem();
-  commentsListEl.innerHTML = '';
-  if (!item) {
-    commentsListEl.innerHTML = '<p class="comments-empty">Producto no encontrado.</p>';
-    return;
-  }
-  const list = Array.isArray(item.comments) ? item.comments : [];
-  if (!list.length) {
-    commentsListEl.innerHTML = '<p class="comments-empty">Aún no hay comentarios. Añadí el primero abajo.</p>';
-    return;
-  }
-  const sorted = [...list].sort((a, b) => new Date(a.at) - new Date(b.at));
-  sorted.forEach(c => {
-    const row = document.createElement('div');
-    row.className = 'comment-row';
-    const del = document.createElement('button');
-    del.className = 'comment-row-del';
-    del.type = 'button';
-    del.title = 'Eliminar comentario';
-    del.setAttribute('aria-label', 'Eliminar comentario');
-    del.textContent = '×';
-    del.addEventListener('click', () => deleteComment(c.id));
-    const meta = document.createElement('div');
-    meta.className = 'comment-meta';
-    const who = document.createElement('span');
-    who.className = 'comment-author-pill';
-    who.textContent = labelAuthor(c.author || 'me');
-    const when = document.createElement('span');
-    when.textContent = ' ' + formatCommentAt(c.at);
-    meta.appendChild(who);
-    meta.appendChild(when);
-    const textEl = document.createElement('div');
-    textEl.className = 'comment-text';
-    textEl.textContent = c.text;
-    row.appendChild(del);
-    row.appendChild(meta);
-    row.appendChild(textEl);
-    commentsListEl.appendChild(row);
-  });
-}
-
-async function deleteComment(commentId) {
-  if (!commentTargetUrl) return;
-  const res = await fetch('/api/products', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'delete-comment', url: commentTargetUrl, commentId }),
-  });
-  if (res.ok) {
-    ITEMS = await res.json();
-    renderCommentsList();
-    render();
-  } else {
-    const err = await res.json().catch(() => ({}));
-    alert(err.error || 'No se pudo eliminar el comentario');
-  }
-}
-
-commentModalClose.addEventListener('click', closeCommentModal);
-commentModal.addEventListener('click', e => { if (e.target === commentModal) closeCommentModal(); });
-
-commentForm.addEventListener('submit', async e => {
-  e.preventDefault();
-  const text = commentText.value.trim();
-  if (!text || !commentTargetUrl) return;
-  commentSubmit.disabled = true;
-  commentSubmit.textContent = 'Enviando…';
-  try {
-    const res = await fetch('/api/products', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'add-comment',
-        url: commentTargetUrl,
-        text,
-        author: commentAuthor.value,
-      }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `HTTP ${res.status}`);
-    }
-    ITEMS = await res.json();
-    localStorage.setItem('apt-comment-author', commentAuthor.value);
-    commentText.value = '';
-    renderCommentsList();
-    render();
-  } catch (err) {
-    alert(err.message || 'Error al añadir comentario');
-  } finally {
-    commentSubmit.disabled = false;
-    commentSubmit.textContent = 'Añadir comentario';
-  }
-});
-
-async function deleteItem(url) {
-  if (!confirm('¿Eliminar este producto?')) return;
-  // POST + JSON body: Vercel/Node often does not parse a body on DELETE, so the API
-  // could never see { url } and delete would always fail in dev/production.
-  const res = await fetch('/api/products', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'delete', url }),
-  });
-  if (res.ok) {
-    ITEMS = await res.json();
-    render();
-  } else {
-    const err = await res.json().catch(() => ({}));
-    console.error('delete failed', res.status, err);
-    alert(err.error || 'No se pudo eliminar (comprueba BLOB_READ_WRITE_TOKEN en Vercel / .env.local).');
-  }
-}
-
-/* ── RENDER ──────────────────────────────────────────────── */
-function render() {
-  const categories = [...new Set(ITEMS.map(i => i.cat))];
-  const bar        = document.getElementById('js-bar');
-  const container  = document.getElementById('js-cats-container');
-
-  bar.querySelectorAll('.pill:not([data-cat="all"])').forEach(b => b.remove());
-  container.innerHTML = '';
-
-  document.getElementById('js-total').textContent = ITEMS.length;
-  document.getElementById('js-cats').textContent  = categories.length;
-  document.getElementById('js-favs').textContent  = favs.size;
-
-  categories.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = 'pill'; btn.dataset.cat = cat;
-    btn.textContent = `${ICONS[cat] || '·'} ${cat}`;
-    bar.appendChild(btn);
-  });
-
-  categories.forEach(cat => {
-    const catItems = ITEMS.filter(i => i.cat === cat);
-    const sec = document.createElement('section');
-    sec.className = 'cat-section'; sec.dataset.cat = cat;
-    sec.innerHTML = `
-      <div class="cat-head">
-        <span class="cat-icon">${ICONS[cat] || '📦'}</span>
-        <h2 class="cat-title">${cat}</h2>
-        <span class="cat-n">${catItems.length} ${catItems.length === 1 ? 'producto' : 'productos'}</span>
-      </div>
-      <div class="grid"></div>
-    `;
-    const grid = sec.querySelector('.grid');
-    catItems.forEach(item => grid.appendChild(makeCard(item, ITEMS.indexOf(item))));
-    container.appendChild(sec);
-  });
-
-  renderFavSection();
-}
-
-/* ── FILTER ──────────────────────────────────────────────── */
-document.getElementById('js-bar').addEventListener('click', e => {
-  const btn = e.target.closest('.pill');
-  if (!btn) return;
-  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-  btn.classList.add('active');
-  const cat = btn.dataset.cat;
-  document.querySelectorAll('.cat-section').forEach(s => s.classList.toggle('hidden', cat !== 'all' && s.dataset.cat !== cat));
-  renderFavSection();
-});
-
-init();
-</script>
-</body>
+    </dialog>
+    <dialog id="confirm-dialog">
+      <form method="dialog" class="dialog-content">
+        <h2>¿Eliminar este producto?</h2>
+        <p>Se eliminarán también sus comentarios e historial.</p>
+        <div class="inline">
+          <button value="cancel" class="secondary">Cancelar</button
+          ><button value="delete" class="danger">Eliminar</button>
+        </div>
+      </form>
+    </dialog>
+    <datalist id="categories">
+      <option>Sofás y Asientos</option>
+      <option>Mesas de Comedor</option>
+      <option>Muebles de TV</option>
+      <option>Mesas Auxiliares</option>
+      <option>Almacenaje</option>
+      <option>Iluminación</option>
+      <option>Decoración</option>
+    </datalist>
+    <datalist id="rooms">
+      <option>Salón</option>
+      <option>Comedor</option>
+      <option>Dormitorio</option>
+      <option>Oficina</option>
+      <option>Cocina</option>
+      <option>Terraza</option>
+      <option>Baño</option>
+    </datalist>
+  </body>
 </html>
