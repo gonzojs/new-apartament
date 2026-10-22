@@ -225,3 +225,48 @@ test("ProductGroup resolves its own offer rather than a cheaper sibling variant"
     8999,
   );
 });
+
+test("incomplete variants never inherit the selected sibling price or stock", () => {
+  const benuta = parseBenuta({
+    response: {
+      results: [
+        {
+          value: "Alfombra",
+          data: {
+            id: "p",
+            variation_id: "a",
+            size: "100",
+            price: 100,
+            currency_code: "EUR",
+            url: "rug",
+          },
+          variations: [{ data: { variation_id: "b", size: "200" } }],
+        },
+      ],
+    },
+  });
+  assert.equal(benuta[0].price_cents, null);
+  const sweeek = parseSweeek({
+    products: [
+      {
+        article_id: "a",
+        title: "Mesa",
+        price: 100,
+        currency_code: "EUR",
+        availability: "in stock",
+        image_link: "https://example.com/a.jpg",
+        link: "https://www.sweeek.es/product/a",
+        variants: [
+          {
+            article_id: "b",
+            color: "Otra",
+            link: "https://www.sweeek.es/product/b",
+          },
+        ],
+      },
+    ],
+  });
+  assert.equal(sweeek[0].price_cents, null);
+  assert.equal(sweeek[0].availability, "unknown");
+  assert.equal(sweeek[0].img, null);
+});

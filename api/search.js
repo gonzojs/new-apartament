@@ -33,7 +33,7 @@ export default endpoint(async (req, res) => {
       unsupported: true,
       external: s.external + encodeURIComponent(q),
     });
-  const key = hash(`v2:${s.id}:${q.toLowerCase()}:ES:EUR`);
+  const key = hash(`v3:${s.id}:${q.toLowerCase()}:ES:EUR`);
   const cached = await db(
     `search_cache?key=eq.${key}&expires_at=gt.${encodeURIComponent(new Date().toISOString())}`,
   );
