@@ -21,7 +21,7 @@
   box-sizing: border-box;
 }
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 body {
   background: var(--bg);
@@ -1336,4 +1336,23 @@ footer {
   .form-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.editor-image {
+  max-width: 100%;
+  height: 180px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #f8f5f0;
+}
+.store-panel {
+  padding: 20px;
+  margin: 16px 0;
+  border: 1px solid #ddd2c4;
+  border-radius: 14px;
+  background: #fffdf8;
+}
+#editor-observation,
+#search-status {
+  overflow-wrap: anywhere;
 }

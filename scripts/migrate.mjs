@@ -1,6 +1,7 @@
 import { mkdir, writeFile, readFile, chmod } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { list } from "@vercel/blob";
+import { identityFor } from "../lib/imports.js";
 import { db } from "../lib/db.js";
 import { canonicalUrl, safeImage } from "../lib/net.js";
 if (process.env.LOCAL_DATABASE_PATH) await import("./local-db.mjs");
@@ -61,12 +62,13 @@ if (mode === "backup") {
     const row = {
       id: stableId(url),
       url,
+      identity_key: identityFor({ url }),
       name: p.name,
       store: p.store || "",
       cat: p.cat || "Sin categoría",
       img: safeImage(p.img),
     };
-    await db("products?on_conflict=url", {
+    await db("products?on_conflict=identity_key", {
       method: "POST",
       prefer: "resolution=ignore-duplicates,return=representation",
       body: row,

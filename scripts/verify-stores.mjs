@@ -6,9 +6,9 @@ for (const s of STORES) {
     continue;
   }
   try {
-    const r = await searchStore(s.id, "mesa");
+    const r = await searchStore(s.id, s.id === "benuta" ? "alfombra" : "mesa");
     if (!r.items.length) throw new Error("Sin resultados");
-    const p = await getProduct(r.items[0].url);
+    const p = await getProduct(r.items[0].url, r.items[0]);
     if (p.price_cents === null || p.currency !== "EUR")
       throw new Error("Precio no verificado");
     console.log(
