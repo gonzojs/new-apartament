@@ -19,19 +19,6 @@
     <script type="module" src="/web/app.js"></script>
   </head>
   <body>
-    <header class="hero">
-      <div class="hero-inner">
-        <div class="topline">
-          <span class="brand">MI LISTA DE DESEOS</span
-          ><button id="access" class="ghost">Administrar</button>
-        </div>
-        <h1>Productos que me gustan</h1>
-        <p class="intro">
-          Busca productos, guarda tus favoritos y marca lo que ya compraste.
-        </p>
-        <div id="summary" class="summary" aria-live="polite"></div>
-      </div>
-    </header>
     <nav class="navigation" aria-label="Secciones">
       <div class="nav-inner">
         <button id="tab-list" class="tab active" aria-pressed="true">
@@ -43,6 +30,7 @@
         ><button id="tab-stores" class="tab" aria-pressed="false" hidden>
           Tiendas
         </button>
+        <button id="access" class="secondary">Administrar</button>
       </div>
     </nav>
     <main class="main">

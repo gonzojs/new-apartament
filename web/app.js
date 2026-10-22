@@ -91,14 +91,6 @@ function populateSelect(selector, values) {
   el.value = selected;
 }
 function render() {
-  const selected = items.filter((p) => p.status === "chosen"),
-    bought = items.filter((p) => p.status === "purchased");
-  const total = (list) =>
-    list.reduce((n, p) => n + (p.price_cents ?? 0) * p.quantity, 0);
-  const unknown = selected.filter((p) => p.price_cents === null).length;
-  const approximate = selected.some((p) => p.price_kind === "from");
-  $("#summary").innerHTML =
-    `<div><strong>${items.length}</strong><span>productos guardados</span></div><div><strong>${approximate ? "Desde " : ""}${money(total(selected))}</strong><span>selección elegida</span>${unknown ? `<small>${unknown} sin precio, no incluidos</small>` : ""}</div><div><strong>${money(bought.reduce((n, p) => n + (p.purchased_cents ?? 0) * p.quantity, 0))}</strong><span>comprado</span>${bought.some((p) => p.purchased_cents === null) ? "<small>Hay compras sin importe registrado</small>" : ""}</div>`;
   populateSelect(
     "#filter-cat",
     items.map((p) => p.cat),
