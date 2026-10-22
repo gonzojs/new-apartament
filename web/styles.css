@@ -884,6 +884,9 @@ input[type="checkbox"] {
   background: #a43c34;
   color: white;
 }
+.danger:hover {
+  background: #873029;
+}
 .main {
   padding-top: 32px;
 }
@@ -1008,27 +1011,38 @@ dialog h2 {
 }
 .card-actions {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
   gap: 8px;
   margin-top: auto;
   padding-top: 10px;
 }
+.card-actions > a,
+.card-actions > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: center;
+}
 .card-actions button {
   background: none;
   color: var(--accent);
-  font-weight: 500;
-  font-size: 13px;
-  min-height: 40px;
 }
 .card-actions .primary {
   background: var(--accent);
   color: white;
 }
-.card-link {
-  font-size: 12px;
+.card-actions .card-link {
+  align-self: stretch;
   margin: 0;
-  padding: 0;
+  border-color: var(--accent);
 }
 .favorite {
   position: absolute;
@@ -1202,7 +1216,7 @@ dialog::backdrop {
 }
 .comment-meta button {
   background: none;
-  color: var(--accent);
+  color: #a43c34;
 }
 #toast {
   position: fixed;
@@ -1324,7 +1338,7 @@ footer {
     padding: 26px 20px;
   }
   .card-actions {
-    flex-wrap: wrap;
+    flex-direction: column;
   }
   .intro {
     font-size: 14px;
