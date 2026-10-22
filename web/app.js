@@ -267,6 +267,10 @@ function applyCandidate(p, revisions = {}) {
     : (p.warnings || []).join(" ");
 }
 function openEditor(id, seed = {}) {
+  if (!isAdmin) {
+    $("#access").click();
+    return;
+  }
   cancelPreview();
   fieldRevisions = {};
   previewVariants = [];

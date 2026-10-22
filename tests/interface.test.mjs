@@ -91,6 +91,9 @@ async function setup({ admin = true, handle } = {}) {
 test("public discovery opens login and retains the query; validation is visible", async () => {
   const u = await setup({ admin: false });
   try {
+    u.$("#add").click();
+    assert.equal(u.$("#editor-dialog").open, false);
+    u.$("#login-dialog").close();
     u.$("#tab-discover").click();
     u.input("#search-query", "m");
     u.submit("#search-form");
