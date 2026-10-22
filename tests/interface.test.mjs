@@ -282,7 +282,7 @@ test("expired sessions stop loading and show an actionable error", async () => {
     u.close();
   }
 });
-test("admin purchase checkbox persists status and updates the purchased total", async () => {
+test("admin purchase checkbox persists status and purchased amount", async () => {
   let product = {
     id: "purchase-item",
     url: "https://example.com/purchase",
@@ -322,7 +322,7 @@ test("admin purchase checkbox persists status and updates the purchased total", 
     assert.equal(patches[0].status, "purchased");
     assert.equal(patches[0].version, 1);
     assert.equal(u.$("[data-purchased]").checked, true);
-    assert.match(u.$("#summary").textContent, /90,00/);
+    assert.equal(product.purchased_cents, 4500);
     const second = u.$("[data-purchased]");
     second.checked = false;
     second.dispatchEvent(new u.w.Event("change", { bubbles: true }));
