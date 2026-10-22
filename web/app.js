@@ -44,6 +44,14 @@ function updateAdmin(value) {
   if (!value) {
     searchController?.abort();
     searchGeneration++;
+    for (const [id, r] of results)
+      if (r.status === "loading")
+        results.set(id, {
+          ...r,
+          status: "error",
+          error: "La búsqueda se detuvo. Introduce la clave para continuar.",
+        });
+    if (results.size) renderSearch();
     $("#editor-dialog").close();
   }
 }
@@ -668,6 +676,7 @@ function renderSearch() {
       const retry = document.createElement("button");
       retry.className = "secondary";
       retry.textContent = "Reintentar";
+      retry.disabled = loading > 0;
       retry.onclick = () => {
         if (!isAdmin) {
           pendingSearch = true;

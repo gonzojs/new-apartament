@@ -69,6 +69,7 @@ async function setup({ admin = true, handle } = {}) {
       else if (name === "search") value = stores;
       else value = {};
     }
+    if (value instanceof Response) return value;
     return new Response(JSON.stringify(value), {
       headers: { "Content-Type": "application/json" },
     });
@@ -255,6 +256,28 @@ test("store administration lists capabilities", async () => {
     assert.equal(u.$("#stores-view").hidden, false);
     assert.match(u.$("#stores-content").textContent, /Northdeco/);
     assert.match(u.$("#stores-content").textContent, /Búsqueda: Externa/);
+  } finally {
+    u.close();
+  }
+});
+
+test("expired sessions stop loading and show an actionable error", async () => {
+  const u = await setup({
+    handle: (name, opts) =>
+      name === "search" && opts.method === "POST"
+        ? new Response(JSON.stringify({ error: "Clave necesaria" }), {
+            status: 401,
+            headers: { "Content-Type": "application/json" },
+          })
+        : undefined,
+  });
+  try {
+    u.input("#search-store", "northdeco");
+    u.input("#search-query", "mesa");
+    u.submit("#search-form");
+    await until(() => u.$("#access").textContent === "Administrar");
+    assert.match(u.$("#search-results").textContent, /La búsqueda se detuvo/);
+    assert.doesNotMatch(u.$("#search-status").textContent, /Buscando/);
   } finally {
     u.close();
   }
