@@ -98,7 +98,7 @@ function render() {
   const unknown = selected.filter((p) => p.price_cents === null).length;
   const approximate = selected.some((p) => p.price_kind === "from");
   $("#summary").innerHTML =
-    `<div><strong>${items.length}</strong><span>piezas guardadas</span></div><div><strong>${approximate ? "Desde " : ""}${money(total(selected))}</strong><span>selección elegida</span>${unknown ? `<small>${unknown} sin precio, no incluidos</small>` : ""}</div><div><strong>${money(bought.reduce((n, p) => n + (p.purchased_cents ?? 0) * p.quantity, 0))}</strong><span>comprado</span>${bought.some((p) => p.purchased_cents === null) ? "<small>Hay compras sin importe registrado</small>" : ""}</div>`;
+    `<div><strong>${items.length}</strong><span>productos guardados</span></div><div><strong>${approximate ? "Desde " : ""}${money(total(selected))}</strong><span>selección elegida</span>${unknown ? `<small>${unknown} sin precio, no incluidos</small>` : ""}</div><div><strong>${money(bought.reduce((n, p) => n + (p.purchased_cents ?? 0) * p.quantity, 0))}</strong><span>comprado</span>${bought.some((p) => p.purchased_cents === null) ? "<small>Hay compras sin importe registrado</small>" : ""}</div>`;
   populateSelect(
     "#filter-cat",
     items.map((p) => p.cat),
@@ -142,7 +142,7 @@ function card(p, discovery = false) {
     : null;
   const el = document.createElement("article");
   el.className = "card";
-  el.innerHTML = `<div class="card-thumb">${p.img ? `<img src="${esc(safeHref(p.img))}" alt="${esc(p.name)}" loading="lazy" referrerpolicy="no-referrer">` : '<div class="thumb-placeholder" aria-hidden="true">⌂</div>'}${!discovery ? `<button class="favorite" aria-label="${p.favorite ? "Quitar" : "Marcar"} favorito" aria-pressed="${p.favorite}" ${!isAdmin ? "disabled" : ""}>${p.favorite ? "♥" : "♡"}</button>` : ""}</div><div class="card-body"><div class="card-top"><span class="store-name">${esc(p.store)}</span>${!discovery ? `<span class="badge ${p.status}">${statuses[p.status]}</span>` : ""}</div><h3 class="card-name">${esc(p.name)}</h3>${p.variant ? `<p class="muted">${esc(p.variant)}</p>` : ""}<div class="card-price">${esc(priceLabel(p))}</div><p class="availability">${p.price_kind === "manual" ? "Precio manual" : p.refresh_error || (p.checked_at && Date.now() - new Date(p.checked_at).getTime() > 48 * 3600000) ? "Precio sin actualizar" : p.price_kind === "from" ? "Verifica la variante en la tienda" : p.availability === "in_stock" ? "Disponible" : p.availability === "out_of_stock" ? "Agotado" : "Disponibilidad sin verificar"}</p>${!discovery ? `<p class="muted">${esc(p.room || p.cat)}${p.quantity > 1 ? ` · ${p.quantity} unidades` : ""}</p><p class="muted">${p.checked_at ? `Comprobado ${esc(date(p.checked_at))}` : "Sin comprobación automática"}</p>` : ""}<div class="card-actions"><a class="card-link" href="${esc(safeHref(p.url))}" target="_blank" rel="noopener noreferrer">Ver en tienda ↗</a><button class="${discovery ? "primary" : ""}" data-action>${discovery ? (existing ? "Ya guardado · Ver" : "Guardar") : "Detalles"}</button></div></div>`;
+  el.innerHTML = `<div class="card-thumb">${p.img ? `<img src="${esc(safeHref(p.img))}" alt="${esc(p.name)}" loading="lazy" referrerpolicy="no-referrer">` : '<div class="thumb-placeholder" aria-hidden="true">⌂</div>'}${!discovery ? `<button class="favorite" aria-label="${p.favorite ? "Quitar" : "Marcar"} favorito" aria-pressed="${p.favorite}" ${!isAdmin ? "disabled" : ""}>${p.favorite ? "♥" : "♡"}</button>` : ""}</div><div class="card-body"><div class="card-top"><span class="store-name">${esc(p.store)}</span>${!discovery ? `<span class="badge ${p.status}">${statuses[p.status]}</span>` : ""}</div><h3 class="card-name">${esc(p.name)}</h3>${p.variant ? `<p class="muted">${esc(p.variant)}</p>` : ""}<div class="card-price">${esc(priceLabel(p))}</div><p class="availability">${p.price_kind === "manual" ? "Precio manual" : p.refresh_error || (p.checked_at && Date.now() - new Date(p.checked_at).getTime() > 48 * 3600000) ? "Precio sin actualizar" : p.price_kind === "from" ? "Verifica la variante en la tienda" : p.availability === "in_stock" ? "Disponible" : p.availability === "out_of_stock" ? "Agotado" : "Disponibilidad sin verificar"}</p>${!discovery ? `<p class="muted">${esc(p.room || p.cat)}${p.quantity > 1 ? ` · ${p.quantity} unidades` : ""}</p><p class="muted">${p.checked_at ? `Comprobado ${esc(date(p.checked_at))}` : "Sin comprobación automática"}</p>` : ""}<div class="card-actions"><a class="card-link" href="${esc(safeHref(p.url))}" target="_blank" rel="noopener noreferrer">Ver en tienda ↗</a><button class="${discovery ? "primary" : ""}" data-action>${discovery ? (existing ? "Ya guardado · Ver" : "Guardar") : "Detalles"}</button></div>${!discovery && isAdmin ? `<label class="purchase-toggle ${p.status === "purchased" ? "is-checked" : ""}"><input type="checkbox" data-purchased ${p.status === "purchased" ? "checked" : ""} aria-label="${p.status === "purchased" ? "Quitar marca de comprado" : "Marcar como comprado"}: ${esc(p.name)}" /> Comprado</label>` : ""}</div>`;
   el.querySelector("img")?.addEventListener("error", (e) => {
     e.target.replaceWith(
       Object.assign(document.createElement("div"), {
@@ -168,6 +168,31 @@ function card(p, discovery = false) {
       );
     }),
   );
+  el.querySelector("[data-purchased]")?.addEventListener("change", (e) => {
+    const checkbox = e.currentTarget;
+    guarded(checkbox, async () => {
+      try {
+        const updated = await api("products", {
+          method: "PATCH",
+          body: {
+            id: p.id,
+            version: p.version,
+            status: checkbox.checked ? "purchased" : "interested",
+          },
+        });
+        replaceItem(updated);
+        if (detailId === updated.id) await openDetail(updated.id);
+        toast(
+          updated.status === "purchased"
+            ? "Marcado como comprado."
+            : "Producto pendiente de compra.",
+        );
+      } catch (error) {
+        checkbox.checked = p.status === "purchased";
+        throw error;
+      }
+    });
+  });
   return el;
 }
 for (const id of [

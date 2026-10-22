@@ -282,3 +282,99 @@ test("expired sessions stop loading and show an actionable error", async () => {
     u.close();
   }
 });
+test("admin purchase checkbox persists status and updates the purchased total", async () => {
+  let product = {
+    id: "purchase-item",
+    url: "https://example.com/purchase",
+    name: "Lámpara favorita",
+    store: "Tienda",
+    price_cents: 4500,
+    purchased_cents: null,
+    quantity: 2,
+    status: "interested",
+    favorite: true,
+    version: 1,
+  };
+  const patches = [];
+  const u = await setup({
+    handle: (name, opts, body) => {
+      if (name === "products" && opts.method === "GET") return [product];
+      if (name === "products" && opts.method === "PATCH") {
+        patches.push(body);
+        product = {
+          ...product,
+          ...body,
+          version: product.version + 1,
+          purchased_cents:
+            body.status === "purchased" ? product.price_cents : null,
+        };
+        return product;
+      }
+    },
+  });
+  try {
+    const first = u.$("[data-purchased]");
+    assert.ok(first);
+    assert.equal(first.checked, false);
+    first.checked = true;
+    first.dispatchEvent(new u.w.Event("change", { bubbles: true }));
+    await until(() => u.$(".badge").textContent === "Comprado");
+    assert.equal(patches[0].status, "purchased");
+    assert.equal(patches[0].version, 1);
+    assert.equal(u.$("[data-purchased]").checked, true);
+    assert.match(u.$("#summary").textContent, /90,00/);
+    const second = u.$("[data-purchased]");
+    second.checked = false;
+    second.dispatchEvent(new u.w.Event("change", { bubbles: true }));
+    await until(() => u.$(".badge").textContent === "Me interesa");
+    assert.equal(patches[1].status, "interested");
+    assert.equal(patches[1].version, 2);
+    assert.equal(u.$("[data-purchased]").checked, false);
+  } finally {
+    u.close();
+  }
+});
+test("public cards do not offer a purchase checkbox and failed changes revert", async () => {
+  const p = {
+    id: "purchase-failure",
+    url: "https://example.com/failure",
+    name: "Mesa",
+    store: "Tienda",
+    price_cents: null,
+    purchased_cents: null,
+    quantity: 1,
+    status: "interested",
+    favorite: false,
+    version: 1,
+  };
+  const publicView = await setup({
+    admin: false,
+    handle: (name) => (name === "products" ? [p] : undefined),
+  });
+  try {
+    assert.equal(publicView.$("[data-purchased]"), null);
+  } finally {
+    publicView.close();
+  }
+  const u = await setup({
+    handle: (name, opts) =>
+      name === "products"
+        ? opts.method === "PATCH"
+          ? new Response(JSON.stringify({ error: "No se pudo guardar" }), {
+              status: 503,
+              headers: { "Content-Type": "application/json" },
+            })
+          : [p]
+        : undefined,
+  });
+  try {
+    const checkbox = u.$("[data-purchased]");
+    checkbox.checked = true;
+    checkbox.dispatchEvent(new u.w.Event("change", { bubbles: true }));
+    await until(() => u.$("#toast").textContent === "No se pudo guardar");
+    assert.equal(checkbox.checked, false);
+    assert.equal(u.$(".badge").textContent, "Me interesa");
+  } finally {
+    u.close();
+  }
+});

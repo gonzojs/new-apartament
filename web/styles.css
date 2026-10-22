@@ -83,11 +83,11 @@ body {
 }
 .hero h1 {
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(44px, 7vw, 80px);
+  font-size: clamp(28px, 3.5vw, 38px);
   font-weight: 300;
-  line-height: 0.95;
+  line-height: 1.15;
   letter-spacing: -0.025em;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
 }
 .hero h1 em {
   font-style: italic;
@@ -778,7 +778,7 @@ input[type="checkbox"] {
   accent-color: var(--accent);
 }
 .hero {
-  padding: 24px 40px 40px;
+  padding: 18px 40px 22px;
 }
 .hero-inner {
   max-width: 1160px;
@@ -788,7 +788,7 @@ input[type="checkbox"] {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 36px;
+  margin-bottom: 14px;
 }
 .brand {
   font-size: 11px;
@@ -804,19 +804,20 @@ input[type="checkbox"] {
 }
 .intro {
   color: #d9cac2;
-  margin: 0 auto 28px;
-  max-width: 480px;
+  margin: 0 auto 16px;
+  max-width: 640px;
+  font-size: 14px;
 }
 .summary {
   display: flex;
   justify-content: center;
-  gap: 40px;
+  gap: 28px;
   flex-wrap: wrap;
 }
 .summary strong {
   display: block;
   font:
-    500 30px "Cormorant Garamond",
+    500 24px "Cormorant Garamond",
     serif;
   color: #edaf97;
 }
@@ -1264,10 +1265,10 @@ footer {
 }
 @media (max-width: 720px) {
   .hero {
-    padding: 18px 20px 30px;
+    padding: 14px 20px 20px;
   }
   .topline {
-    margin-bottom: 28px;
+    margin-bottom: 12px;
   }
   .brand {
     font-size: 9px;
@@ -1276,7 +1277,7 @@ footer {
     gap: 18px;
   }
   .summary strong {
-    font-size: 26px;
+    font-size: 22px;
   }
   .main {
     padding: 28px 18px 50px;
@@ -1355,4 +1356,23 @@ footer {
 #editor-observation,
 #search-status {
   overflow-wrap: anywhere;
+}
+
+.purchase-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+}
+.purchase-toggle input {
+  margin: 0;
+}
+.purchase-toggle.is-checked {
+  color: #3d684b;
 }
