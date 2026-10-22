@@ -30,6 +30,8 @@ const tables = new Set([
   "rate_limits",
   "leases",
   "search_cache",
+  "import_candidates",
+  "store_health",
 ]);
 const identifier = (s) => {
   if (!/^[a-z_]+$/.test(s)) throw new Error("Invalid SQL identifier");
@@ -117,6 +119,17 @@ export async function localDb(
     }
     sql += ` limit ${Math.min(2000, Number(u.searchParams.get("limit") || 1000))}`;
     return (await pg.query(sql, params)).rows;
+  }
+  if (method === "PATCH") {
+    const assignments = Object.entries(body).map(
+      ([key, value]) => `${identifier(key)}=${bind(value)}`,
+    );
+    return (
+      await pg.query(
+        `update ${identifier(table)} set ${assignments.join(",")}${where} returning *`,
+        params,
+      )
+    ).rows;
   }
   if (method === "DELETE")
     return (

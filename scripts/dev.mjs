@@ -13,6 +13,7 @@ const routes = new Set([
   "preview",
   "refresh",
   "cron",
+  "stores",
 ]);
 const modules = Object.fromEntries(
   await Promise.all(

@@ -28,8 +28,8 @@ test("public view blocks mutations and external consumption", async ({
     .getByRole("button", { name: "Descubrir productos", exact: true })
     .click();
   await expect(
-    page.getByRole("button", { name: "Buscar en tiendas" }),
-  ).toBeDisabled();
+    page.getByRole("button", { name: "Entrar para buscar" }),
+  ).toBeEnabled();
 });
 test("admin saves, edits, favorites, comments, history, purchases and logout persist", async ({
   page,
@@ -149,6 +149,6 @@ test("search delivers partial results, isolates failures and ignores old queries
     page.getByText("Tienda no disponible", { exact: true }),
   ).toBeVisible();
   await expect(page.getByText("Búsqueda externa", { exact: true })).toHaveCount(
-    3,
+    5,
   );
 });

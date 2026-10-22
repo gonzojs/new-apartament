@@ -10,7 +10,7 @@ const { canonicalUrl, publicIP, fetchPublic } = await import("../lib/net.js");
 const { structuredProduct, empathyResult, STORES } = await import(
   "../lib/stores.js"
 );
-const { login, logout, session, admin, matches } = await import(
+const { login, logout, session, admin, matches, hash } = await import(
   "../lib/auth.js"
 );
 let pg;
@@ -64,7 +64,7 @@ test("product creation is idempotent and variants remain separate", async () => 
     b = await save(d);
   assert.equal(a.id, b.id);
   assert.equal(a.price_cents, null);
-  const v = await save({ ...d, url: d.url + "?variant=2" });
+  const v = await save(data({ url: d.url + "?variant=2" }));
   assert.notEqual(v.id, a.id);
 });
 test("manual prices including zero have history; concurrent/stale writes cannot clobber", async () => {
@@ -187,6 +187,17 @@ test("admin login sets HttpOnly cookie, blocks cross-origin requests, expires an
   assert.match(cookie, /SameSite=Strict/);
   req.headers.cookie = cookie.split(";")[0];
   assert.equal(await session(req), true);
+  const tokenHash = hash(req.headers.cookie.split("=")[1]);
+  await db(`admin_sessions?token_hash=eq.${tokenHash}`, {
+    method: "PATCH",
+    body: { expires_at: new Date(Date.now() + 60000).toISOString() },
+  });
+  assert.equal(await session(req, res), true);
+  assert.match(cookie, /Max-Age=31536000/);
+  const renewed = (await db(`admin_sessions?token_hash=eq.${tokenHash}`))[0];
+  assert.ok(
+    new Date(renewed.expires_at).getTime() > Date.now() + 364 * 86400000,
+  );
   await admin(req);
   await assert.rejects(
     admin({ ...req, headers: { ...req.headers, origin: "https://evil.com" } }),

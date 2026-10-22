@@ -1,3 +1,4 @@
+import { runStores } from "./search-queue.js";
 import {
   api,
   money,
@@ -30,7 +31,11 @@ function updateAdmin(value) {
   $("#access").textContent = value ? "Cerrar administración" : "Administrar";
   $("#add").hidden = !value;
   $("#search-lock").hidden = value;
-  $("#search-submit").disabled = !value;
+  $("#search-submit").textContent = value
+    ? "Buscar en tiendas"
+    : "Entrar para buscar";
+  $("#tab-stores").hidden = !value;
+  if (!value && !$("#stores-view").hidden) tab(false);
   $("#footer-mode").textContent = value
     ? "· Modo administrador"
     : "· Vista pública";
@@ -120,9 +125,16 @@ function render() {
       `<p class="empty">${items.length ? "No hay productos con estos filtros." : "Tu selección empieza aquí. Añade el primer enlace desde el modo administrador."}</p>`;
 }
 function card(p, discovery = false) {
+  const existing = discovery
+    ? items.find((x) =>
+        p.identity_key
+          ? x.identity_key === p.identity_key
+          : x.url === p.url && !x.variant_id && !p.variant_id,
+      )
+    : null;
   const el = document.createElement("article");
   el.className = "card";
-  el.innerHTML = `<div class="card-thumb">${p.img ? `<img src="${esc(safeHref(p.img))}" alt="${esc(p.name)}" loading="lazy" referrerpolicy="no-referrer">` : '<div class="thumb-placeholder" aria-hidden="true">⌂</div>'}${!discovery ? `<button class="favorite" aria-label="${p.favorite ? "Quitar" : "Marcar"} favorito" aria-pressed="${p.favorite}" ${!isAdmin ? "disabled" : ""}>${p.favorite ? "♥" : "♡"}</button>` : ""}</div><div class="card-body"><div class="card-top"><span class="store-name">${esc(p.store)}</span>${!discovery ? `<span class="badge ${p.status}">${statuses[p.status]}</span>` : ""}</div><h3 class="card-name">${esc(p.name)}</h3>${p.variant ? `<p class="muted">${esc(p.variant)}</p>` : ""}<div class="card-price">${esc(priceLabel(p))}</div><p class="availability">${p.price_kind === "manual" ? "Precio manual" : p.refresh_error || (p.checked_at && Date.now() - new Date(p.checked_at).getTime() > 48 * 3600000) ? "Precio sin actualizar" : p.price_kind === "from" ? "Verifica la variante en la tienda" : p.availability === "in_stock" ? "Disponible" : p.availability === "out_of_stock" ? "Agotado" : "Disponibilidad sin verificar"}</p>${!discovery ? `<p class="muted">${esc(p.room || p.cat)}${p.quantity > 1 ? ` · ${p.quantity} unidades` : ""}</p><p class="muted">${p.checked_at ? `Comprobado ${esc(date(p.checked_at))}` : "Sin comprobación automática"}</p>` : ""}<div class="card-actions"><a class="card-link" href="${esc(safeHref(p.url))}" target="_blank" rel="noopener noreferrer">Ver en tienda ↗</a><button class="${discovery ? "primary" : ""}" data-action>${discovery ? "Guardar" : "Detalles"}</button></div></div>`;
+  el.innerHTML = `<div class="card-thumb">${p.img ? `<img src="${esc(safeHref(p.img))}" alt="${esc(p.name)}" loading="lazy" referrerpolicy="no-referrer">` : '<div class="thumb-placeholder" aria-hidden="true">⌂</div>'}${!discovery ? `<button class="favorite" aria-label="${p.favorite ? "Quitar" : "Marcar"} favorito" aria-pressed="${p.favorite}" ${!isAdmin ? "disabled" : ""}>${p.favorite ? "♥" : "♡"}</button>` : ""}</div><div class="card-body"><div class="card-top"><span class="store-name">${esc(p.store)}</span>${!discovery ? `<span class="badge ${p.status}">${statuses[p.status]}</span>` : ""}</div><h3 class="card-name">${esc(p.name)}</h3>${p.variant ? `<p class="muted">${esc(p.variant)}</p>` : ""}<div class="card-price">${esc(priceLabel(p))}</div><p class="availability">${p.price_kind === "manual" ? "Precio manual" : p.refresh_error || (p.checked_at && Date.now() - new Date(p.checked_at).getTime() > 48 * 3600000) ? "Precio sin actualizar" : p.price_kind === "from" ? "Verifica la variante en la tienda" : p.availability === "in_stock" ? "Disponible" : p.availability === "out_of_stock" ? "Agotado" : "Disponibilidad sin verificar"}</p>${!discovery ? `<p class="muted">${esc(p.room || p.cat)}${p.quantity > 1 ? ` · ${p.quantity} unidades` : ""}</p><p class="muted">${p.checked_at ? `Comprobado ${esc(date(p.checked_at))}` : "Sin comprobación automática"}</p>` : ""}<div class="card-actions"><a class="card-link" href="${esc(safeHref(p.url))}" target="_blank" rel="noopener noreferrer">Ver en tienda ↗</a><button class="${discovery ? "primary" : ""}" data-action>${discovery ? (existing ? "Ya guardado · Ver" : "Guardar") : "Detalles"}</button></div></div>`;
   el.querySelector("img")?.addEventListener("error", (e) => {
     e.target.replaceWith(
       Object.assign(document.createElement("div"), {
@@ -132,7 +144,11 @@ function card(p, discovery = false) {
     );
   });
   el.querySelector("[data-action]").addEventListener("click", () =>
-    discovery ? openEditor(null, p) : openDetail(p.id),
+    discovery
+      ? existing
+        ? openDetail(existing.id)
+        : openEditor(null, p)
+      : openDetail(p.id),
   );
   el.querySelector(".favorite")?.addEventListener("click", (e) =>
     guarded(e.currentTarget, async () => {
@@ -156,6 +172,9 @@ for (const id of [
 ])
   $(`#${id}`).addEventListener("input", render);
 function tab(discover) {
+  $("#stores-view").hidden = true;
+  $("#tab-stores").classList.remove("active");
+  $("#tab-stores").setAttribute("aria-pressed", "false");
   $("#list-view").hidden = discover;
   $("#discover-view").hidden = !discover;
   $("#tab-list").classList.toggle("active", !discover);
@@ -196,22 +215,69 @@ $("#login-form").onsubmit = async (e) => {
     $("#login-dialog").close();
     updateAdmin(true);
     toast("Ya puedes editar tu selección.");
+    if (pendingSearch) {
+      pendingSearch = false;
+      startSearch();
+    }
   } catch (err) {
     form.querySelector(".form-error").textContent = err.message;
   } finally {
     button.disabled = false;
   }
 };
+let importCandidate = null,
+  previewController = null,
+  previewTimer,
+  previewSequence = 0,
+  fieldRevisions = {},
+  previewVariants = [];
+function cancelPreview() {
+  clearTimeout(previewTimer);
+  previewController?.abort();
+  previewSequence++;
+}
+function showEditorImage() {
+  const value = $("#editor-form").elements.img.value.trim();
+  editorImage = value || null;
+  $("#editor-image").hidden = !value;
+  $("#editor-image-error").hidden = true;
+  if (value) $("#editor-image").src = safeHref(value);
+}
+$("#editor-image").onerror = () => {
+  $("#editor-image").hidden = true;
+  $("#editor-image-error").hidden = false;
+};
+function showObservation(p) {
+  const el = $("#editor-observation");
+  el.hidden = !p;
+  if (p)
+    el.textContent = `${p.store || ""} · ${priceLabel(p)} · ${p.currency || "EUR"} · ${p.availability === "in_stock" ? "Disponible" : p.availability === "out_of_stock" ? "Agotado" : "Disponibilidad sin verificar"} · ${p.observed_at ? date(p.observed_at) : "Sin comprobar"}${p.warnings?.length ? " · " + p.warnings.join(" ") : ""}`;
+}
+function applyCandidate(p, revisions = {}) {
+  const form = $("#editor-form");
+  importCandidate = p.import_ref ? p : null;
+  for (const key of ["name", "variant", "img"]) {
+    if ((fieldRevisions[key] || 0) === (revisions[key] || 0))
+      form.elements[key].value = p[key] || "";
+  }
+  showEditorImage();
+  showObservation(p);
+  $("#preview-status").textContent = p.import_ref
+    ? "Información recibida. Revisa y guarda."
+    : (p.warnings || []).join(" ");
+}
 function openEditor(id, seed = {}) {
-  if (!isAdmin) return;
+  cancelPreview();
+  fieldRevisions = {};
+  previewVariants = [];
   editing = id ? items.find((p) => p.id === id) : null;
   const p = editing || seed,
     form = $("#editor-form");
   form.reset();
-  editorImage = p.img || null;
   for (const key of [
     "url",
     "name",
+    "img",
     "cat",
     "room",
     "variant",
@@ -222,63 +288,118 @@ function openEditor(id, seed = {}) {
   form.elements.favorite.checked = !!p.favorite;
   form.elements.url.readOnly = !!editing;
   form.elements.manual.checked = p.price_kind === "manual";
-  form.elements.price.value =
-    p.price_cents !== null && p.price_cents !== undefined
-      ? p.price_cents / 100
-      : "";
+  form.elements.price.value = p.price_cents != null ? p.price_cents / 100 : "";
   $("#manual-price-label").hidden = !form.elements.manual.checked;
   $("#editor-title").textContent = editing
     ? "Editar producto"
     : "Añadir producto";
-  $("#preview-status").textContent =
-    seed.price_cents != null ? "El precio se verificará al guardar." : "";
+  $("#preview-status").textContent = "";
   form.querySelector(".form-error").textContent = "";
+  $("#discard-import").hidden = true;
+  $("#variant-choice-label").hidden = true;
+  importCandidate = seed.import_ref ? seed : null;
+  showObservation(importCandidate);
+  showEditorImage();
   $("#editor-dialog").showModal();
 }
 $("#add").onclick = () => openEditor();
 $("#editor-form").elements.manual.onchange = (e) =>
   ($("#manual-price-label").hidden = !e.target.checked);
-let previewSequence = 0;
-$("#editor-form").elements.url.oninput = () => {
-  previewSequence++;
-  editorImage = null;
-  $("#preview-status").textContent = "";
-};
-$("#editor-dialog").addEventListener("close", () => previewSequence++);
-$("#preview").onclick = (e) =>
-  guarded(e.currentTarget, async () => {
-    const form = $("#editor-form"),
-      url = form.elements.url.value,
-      sequence = ++previewSequence;
-    $("#preview-status").textContent = "Consultando la tienda…";
-    try {
-      const p = await api("preview", { method: "POST", body: { url } });
-      if (sequence !== previewSequence) return;
-      if (!form.elements.name.value) form.elements.name.value = p.name || "";
-      form.elements.variant.value = p.variant || form.elements.variant.value;
-      editorImage = p.img;
-      $("#preview-status").textContent = priceLabel(p);
-    } catch (err) {
-      if (sequence === previewSequence)
-        $("#preview-status").textContent = err.message;
+for (const key of ["name", "variant", "img"])
+  $("#editor-form").elements[key].addEventListener("input", () => {
+    fieldRevisions[key] = (fieldRevisions[key] || 0) + 1;
+    if (key === "img") showEditorImage();
+    if (key === "variant" && importCandidate) {
+      importCandidate = null;
+      showObservation(null);
+      $("#preview-status").textContent =
+        "Variante editada. Selecciona la variante de la tienda o indica un precio manual.";
     }
   });
+$("#editor-form").elements.url.oninput = () => {
+  cancelPreview();
+  importCandidate = null;
+  showObservation(null);
+  $("#variant-choice-label").hidden = true;
+  $("#preview-status").textContent = "";
+  // Clear only fields supplied automatically, retaining deliberate user corrections.
+  for (const key of ["name", "variant", "img"])
+    if (!fieldRevisions[key]) $("#editor-form").elements[key].value = "";
+  showEditorImage();
+  const value = $("#editor-form").elements.url.value;
+  try {
+    const u = new URL(value);
+    if (!["http:", "https:"].includes(u.protocol)) return;
+  } catch {
+    return;
+  }
+  previewTimer = setTimeout(loadPreview, 500);
+};
+$("#editor-dialog").addEventListener("close", cancelPreview);
+async function loadPreview() {
+  cancelPreview();
+  const sequence = previewSequence,
+    form = $("#editor-form"),
+    url = form.elements.url.value;
+  if (!url) return;
+  previewController = new AbortController();
+  const revisions = { ...fieldRevisions };
+  $("#preview-status").textContent = "Consultando la tienda…";
+  try {
+    const p = await api("preview", {
+      method: "POST",
+      body: { url },
+      signal: previewController.signal,
+    });
+    if (sequence !== previewSequence) return;
+    applyCandidate(p, revisions);
+    previewVariants = p.variants || [];
+    $("#variant-choice-label").hidden = !previewVariants.length;
+    $("#variant-choice").replaceChildren(
+      new Option("Sin elegir · precio desde", ""),
+      ...previewVariants.map(
+        (v, i) => new Option(`${v.variant} · ${priceLabel(v)}`, String(i)),
+      ),
+    );
+    $("#variant-choice").onchange = (e) => {
+      const selected =
+        e.target.value === "" ? p : previewVariants[Number(e.target.value)];
+      applyCandidate(selected, { ...fieldRevisions });
+    };
+  } catch (err) {
+    if (sequence === previewSequence)
+      $("#preview-status").textContent =
+        err.name === "TimeoutError"
+          ? "La tienda tardó demasiado. Puedes completar los datos manualmente."
+          : err.message;
+  }
+}
+$("#preview").onclick = loadPreview;
+$("#discard-import").onclick = () => {
+  importCandidate = null;
+  showObservation(null);
+  $("#discard-import").hidden = true;
+  $("#editor-form .form-error").textContent =
+    "Completa el precio manual si lo conoces y vuelve a guardar.";
+};
 $("#editor-form").onsubmit = async (e) => {
   e.preventDefault();
+  cancelPreview();
   const form = e.currentTarget,
     button = form.querySelector("[type=submit]");
   button.disabled = true;
   const b = Object.fromEntries(new FormData(form));
   b.quantity = Number(b.quantity);
   b.favorite = form.elements.favorite.checked;
-  b.img = editorImage;
-  const isManual = form.elements.manual.checked;
-  if (isManual)
+  b.img = form.elements.img.value || null;
+  const manual = form.elements.manual.checked;
+  if (manual)
     b.manual_price_cents =
       b.price === "" ? null : Math.round(Number(b.price) * 100);
   else if (editing?.price_kind === "manual") b.manual_price_cents = null;
   delete b.price;
   delete b.manual;
+  if (importCandidate && !editing) b.import_ref = importCandidate.import_ref;
   if (editing) {
     b.id = editing.id;
     b.version = editing.version;
@@ -292,19 +413,18 @@ $("#editor-form").onsubmit = async (e) => {
     $("#editor-dialog").close();
     toast("Producto guardado.");
     if (detailId === p.id) openDetail(p.id);
-    if (!isManual && p.price_kind !== "manual" && !p.checked_at)
+    if (results.size) renderSearch();
+    // Imported observations already came from the store. Never refetch merely to save them.
+    if (!b.import_ref && !manual && !p.checked_at)
       api("refresh", { method: "POST", body: { id: p.id } })
         .then((updated) => {
           replaceItem(updated);
           if (detailId === p.id) openDetail(p.id);
-          if (updated.refresh_error)
-            toast("Guardado. El precio requiere revisión manual.");
         })
-        .catch(() =>
-          toast("Producto guardado; podrás actualizar su precio más tarde."),
-        );
+        .catch(() => toast("Guardado. Podrás actualizar el precio más tarde."));
   } catch (err) {
     form.querySelector(".form-error").textContent = err.message;
+    $("#discard-import").hidden = err.status !== 410;
   } finally {
     button.disabled = false;
   }
@@ -424,55 +544,95 @@ function renderHistory(history) {
   $("#history-content").innerHTML =
     `${values.length > 1 ? `<svg class="history-chart" role="img" aria-label="Evolución del precio: mínimo ${esc(money(min))}, máximo ${esc(money(Math.max(...values)))}" viewBox="0 0 500 120"><polyline class="history-line" points="${points}"/></svg>` : ""}<table class="history"><thead><tr><th>Fecha</th><th>Precio</th><th>Origen</th></tr></thead><tbody>${history.map((h) => `<tr><td>${esc(date(h.observed_at))}</td><td>${h.kind === "from" ? "Desde " : ""}${money(h.price_cents)}</td><td>${h.source === "manual" ? "Manual" : "Tienda"}</td></tr>`).join("")}</tbody></table>`;
 }
-$("#search-form").onsubmit = async (e) => {
+let pendingSearch = false;
+$("#search-form").onsubmit = (e) => {
   e.preventDefault();
-  if (!isAdmin) return;
-  const q = $("#search-query").value.trim();
-  if (q.length < 2) return;
+  startSearch();
+};
+async function startSearch() {
+  const status = $("#search-status"),
+    q = $("#search-query").value.trim();
+  if (q.length < 2 || q.length > 120) {
+    status.textContent = "Escribe entre 2 y 120 caracteres para buscar.";
+    return;
+  }
+  if (!isAdmin) {
+    status.textContent = "Introduce la clave para iniciar esta búsqueda.";
+    pendingSearch = true;
+    $("#access").click();
+    return;
+  }
+  if (!stores.length) {
+    status.textContent =
+      "No se pudo cargar la lista de tiendas. Recarga la página.";
+    return;
+  }
   searchController?.abort();
   searchController = new AbortController();
   activeSearchQuery = q;
   const signal = searchController.signal,
-    generation = ++searchGeneration;
+    generation = ++searchGeneration,
+    selected = $("#search-store").value;
+  const targets = stores.filter((s) => !selected || s.id === selected);
   results = new Map(
-    stores.map((s) => [
+    targets.map((s) => [
       s.id,
       { status: s.search ? "loading" : "unsupported", items: [] },
     ]),
   );
   renderSearch();
-  await Promise.allSettled(
-    stores
-      .filter((s) => s.search)
-      .map(async (s) => {
-        try {
-          const data = await api("search", {
-            method: "POST",
-            body: { store: s.id, query: q },
-            signal,
-          });
-          if (generation !== searchGeneration) return;
-          results.set(s.id, {
-            status: "done",
-            items: data.items,
-            cached: data.cached,
-            query: q,
-          });
-        } catch (err) {
-          if (signal.aborted || generation !== searchGeneration) return;
-          results.set(s.id, { status: "error", items: [], error: err.message });
-        }
-        if (generation === searchGeneration) renderSearch();
-      }),
+  await runStores(
+    targets.filter((s) => s.search),
+    (s) => searchOne(s, q, generation, signal),
+    signal,
   );
-};
+}
+async function searchOne(s, q, generation, signal) {
+  try {
+    const data = await api("search", {
+      method: "POST",
+      body: { store: s.id, query: q },
+      signal,
+    });
+    if (!Array.isArray(data.items))
+      throw new Error("La tienda devolvió una respuesta inválida.");
+    if (generation !== searchGeneration) return;
+    results.set(s.id, {
+      status: "done",
+      items: data.items,
+      cached: data.cached,
+    });
+  } catch (err) {
+    if (signal.aborted || generation !== searchGeneration) return;
+    results.set(s.id, {
+      status: "error",
+      items: [],
+      error:
+        err.name === "TimeoutError"
+          ? "Tiempo de espera agotado. Reintenta la tienda."
+          : err.message,
+    });
+  }
+  if (generation === searchGeneration) renderSearch();
+}
 function renderSearch() {
   const container = $("#search-results");
   container.replaceChildren();
+  const states = [...results.values()],
+    loading = states.filter((r) => r.status === "loading").length;
+  const count = states.reduce((n, r) => n + r.items.length, 0);
+  $("#search-status").textContent = loading
+    ? `Buscando «${activeSearchQuery}» · ${loading} tiendas pendientes · ${count} resultados recibidos`
+    : `Búsqueda terminada · ${count} resultados. ${states.filter((r) => r.status === "error").length} tiendas con error.`;
   for (const s of stores) {
     if ($("#search-store").value && $("#search-store").value !== s.id) continue;
     const r = results.get(s.id);
-    if (!r) continue;
+    if (!r) {
+      if ($("#search-store").value)
+        container.textContent =
+          "Pulsa Buscar en tiendas para consultar esta tienda.";
+      continue;
+    }
     const section = document.createElement("section");
     section.className = "search-group";
     const status =
@@ -499,12 +659,74 @@ function renderSearch() {
       .append(...products.map((p) => card(p, true)));
     if (r.status === "done" && !products.length)
       section.querySelector(".grid").innerHTML =
-        '<p class="muted">No hay resultados para esta búsqueda y filtros.</p>';
+        `<p class="muted">${r.items.length ? "Los filtros ocultan los resultados. Prueba a quitar el precio máximo." : "La tienda no encontró productos para esta búsqueda."}</p>`;
+    if (r.status === "error") {
+      const retry = document.createElement("button");
+      retry.className = "secondary";
+      retry.textContent = "Reintentar";
+      retry.onclick = () => {
+        if (!isAdmin) {
+          pendingSearch = true;
+          $("#access").click();
+          return;
+        }
+        results.set(s.id, { status: "loading", items: [] });
+        renderSearch();
+        searchOne(
+          s,
+          activeSearchQuery,
+          searchGeneration,
+          searchController.signal,
+        );
+      };
+      section.append(retry);
+    }
     container.append(section);
   }
 }
 for (const id of ["search-store", "search-max", "search-sort"])
   $(`#${id}`).oninput = renderSearch;
+async function loadStores() {
+  const target = $("#stores-content");
+  target.textContent = "Consultando integraciones…";
+  try {
+    const data = await api("stores");
+    target.replaceChildren();
+    for (const s of data) {
+      const section = document.createElement("section");
+      section.className = "store-panel";
+      section.innerHTML = `<h3>${esc(s.name)}</h3><p>Búsqueda: ${s.search ? "Automática" : "Externa"} · Enlace: ${s.import_link ? "API / HTML" : "Manual si la web bloquea"}</p><p class="muted">${esc(s.method)}${s.reason ? " · " + esc(s.reason) : ""}</p>${s.health.map((h) => `<p>${h.operation === "search" ? "Buscador" : "Importación"}: ${h.status === "ok" ? "Respondió" : h.status === "partial" ? "Datos parciales" : "Error"} · ${esc(date(h.checked_at))} · ${h.duration_ms} ms${h.error ? " · " + esc(h.error) : ""}</p>`).join("") || '<p class="muted">Aún no hay comprobaciones registradas.</p>'}<button class="secondary">Probar conexión</button><p role="status"></p>`;
+      const button = section.querySelector("button");
+      button.onclick = async () => {
+        button.disabled = true;
+        section.querySelector("[role=status]").textContent = "Comprobando…";
+        try {
+          await api("stores", { method: "POST", body: { store: s.id } });
+          await loadStores();
+        } catch (e) {
+          section.querySelector("[role=status]").textContent = e.message;
+          button.textContent = "Reintentar";
+        } finally {
+          button.disabled = false;
+        }
+      };
+      target.append(section);
+    }
+  } catch (e) {
+    target.textContent = e.message;
+  }
+}
+$("#tab-stores").onclick = () => {
+  if (!isAdmin) return;
+  tab(false);
+  $("#list-view").hidden = true;
+  $("#stores-view").hidden = false;
+  $("#tab-list").classList.remove("active");
+  $("#tab-list").setAttribute("aria-pressed", "false");
+  $("#tab-stores").classList.add("active");
+  $("#tab-stores").setAttribute("aria-pressed", "true");
+  loadStores();
+};
 async function init() {
   try {
     const [products, session, registry] = await Promise.all([
@@ -512,8 +734,11 @@ async function init() {
       api("session"),
       api("search"),
     ]);
+    if (!Array.isArray(products) || !Array.isArray(registry))
+      throw new Error("No se pudieron cargar los datos. Recarga la página.");
     items = products;
     stores = registry;
+    while ($("#search-store").options.length > 1) $("#search-store").remove(1);
     stores.forEach((s) => $("#search-store").add(new Option(s.name, s.id)));
     updateAdmin(session.admin);
     try {

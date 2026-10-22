@@ -12,3 +12,7 @@ scripts/dev.mjs
 scripts/migrate.mjs
 scripts/verify-stores.mjs
 supabase
+
+scripts/migrate-identities.mjs
+
+scripts/verify-migration.mjs

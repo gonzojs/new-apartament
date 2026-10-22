@@ -4,6 +4,7 @@ import http from "node:http";
 process.env.LOCAL_DATABASE_PATH = "memory://";
 process.env.ADMIN_PASSWORD = "api-test-password-not-production";
 process.env.CRON_SECRET = "cron-test";
+const { remember } = await import("../lib/imports.js");
 const { localConnection } = await import("../scripts/local-db.mjs");
 const routeNames = [
   "products",
@@ -14,6 +15,7 @@ const routeNames = [
   "comments",
   "history",
   "cron",
+  "stores",
 ];
 const handlers = Object.fromEntries(
   await Promise.all(
@@ -66,6 +68,8 @@ test("all external and mutation routes require auth; reads are public", async ()
     assert.equal((await call(route, "POST", {})).status, 401, route);
   assert.equal((await call("products")).status, 200);
   assert.equal((await call("cron")).status, 401);
+  assert.equal((await call("stores")).status, 401);
+  assert.equal((await call("stores", "POST", {})).status, 401);
 });
 test("full persisted API lifecycle with conflict, idempotency and logout", async () => {
   const login = await call("session", "POST", {
@@ -94,6 +98,59 @@ test("full persisted API lifecycle with conflict, idempotency and logout", async
     )
   ).json();
   assert.equal(again.id, p.id);
+  const [candidate] = await remember([
+    {
+      url: "https://example.com/import-route",
+      name: "Importado",
+      store_id: "test",
+      product_id: "p1",
+      variant_id: "v1",
+      price_cents: 9999,
+      price_kind: "exact",
+      price_source: "test-api",
+      currency: "EUR",
+      observed_at: "2026-01-01T00:00:00.000Z",
+    },
+  ]);
+  const imported = await (
+    await call(
+      "products",
+      "POST",
+      {
+        url: candidate.url,
+        name: candidate.name,
+        import_ref: candidate.import_ref,
+        price_cents: 1,
+      },
+      true,
+    )
+  ).json();
+  assert.equal(imported.price_cents, 9999);
+  const plainRetry = await (
+    await call(
+      "products",
+      "POST",
+      { url: candidate.url, name: "Sin referencia" },
+      true,
+    )
+  ).json();
+  assert.equal(plainRetry.id, imported.id);
+  assert.equal(
+    (
+      await call(
+        "products",
+        "POST",
+        {
+          url: candidate.url,
+          name: "Manipulado",
+          import_ref: "00000000-0000-4000-a000-000000000000",
+        },
+        true,
+      )
+    ).status,
+    410,
+  );
+  await call(`products?id=${imported.id}`, "DELETE", undefined, true);
   const [a, b] = await Promise.all([
     call(
       "products",

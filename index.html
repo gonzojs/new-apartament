@@ -40,7 +40,10 @@
         ><button id="tab-discover" class="tab" aria-pressed="false">
           Descubrir productos</button
         ><span class="spacer"></span
-        ><button id="add" class="primary" hidden>+ Añadir enlace</button>
+        ><button id="add" class="primary" hidden>+ Añadir enlace</button
+        ><button id="tab-stores" class="tab" aria-pressed="false" hidden>
+          Tiendas
+        </button>
       </div>
     </nav>
     <main class="main">
@@ -99,6 +102,14 @@
           <p class="empty">Cargando tu selección…</p>
         </div>
       </section>
+      <section id="stores-view" hidden aria-labelledby="stores-heading">
+        <h2 id="stores-heading">Tiendas conectadas</h2>
+        <p class="muted">
+          Cada tienda tiene su propia integración. Puedes guardar un enlace
+          aunque la consulta automática falle.
+        </p>
+        <div id="stores-content" aria-live="polite"></div>
+      </section>
       <section id="discover-view" hidden aria-labelledby="discover-heading">
         <div class="section-heading">
           <div>
@@ -110,7 +121,7 @@
           Introduce la clave de administrador para buscar en tiendas y guardar
           productos.
         </p>
-        <form id="search-form" class="search-form">
+        <form id="search-form" class="search-form" novalidate>
           <label class="wide"
             >¿Qué estás buscando?<input
               id="search-query"
@@ -144,6 +155,7 @@
           Precios para España · EUR · Envío y cupones no incluidos. Confirma el
           precio final en la tienda.
         </p>
+        <p id="search-status" role="status" aria-live="polite"></p>
         <div id="search-results" aria-live="polite">
           <p class="empty">
             Busca una idea. Los resultados aparecerán a medida que responda cada
@@ -196,6 +208,27 @@
             Obtener información</button
           ><span id="preview-status" class="muted" role="status"></span>
         </div>
+        <div id="editor-observation" class="notice" hidden></div>
+        <label id="variant-choice-label" hidden
+          >Variante de la tienda<select id="variant-choice"></select
+        ></label>
+        <label
+          >URL de la imagen<input
+            name="img"
+            type="url"
+            maxlength="2048"
+            placeholder="https://…"
+        /></label>
+        <img
+          id="editor-image"
+          class="editor-image"
+          alt="Imagen del producto"
+          hidden
+        />
+        <p id="editor-image-error" class="muted" hidden>
+          No se pudo mostrar la imagen. Puedes sustituir el enlace o guardar
+          igualmente.
+        </p>
         <label>Nombre<input name="name" required maxlength="200" /></label>
         <div class="form-grid">
           <label
@@ -250,6 +283,9 @@
           que solicites una actualización.
         </p>
         <p class="form-error" role="alert"></p>
+        <button type="button" id="discard-import" class="secondary" hidden>
+          Guardar sin datos automáticos
+        </button>
         <button class="primary" type="submit">Guardar producto</button>
       </form>
     </dialog>

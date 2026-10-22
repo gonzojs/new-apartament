@@ -4,12 +4,20 @@ export async function api(path, { method = "GET", body, signal } = {}) {
     credentials: "same-origin",
     headers: body ? { "Content-Type": "application/json" } : undefined,
     body: body ? JSON.stringify(body) : undefined,
-    signal,
+    signal: signal
+      ? AbortSignal.any([signal, AbortSignal.timeout(25000)])
+      : AbortSignal.timeout(25000),
   });
-  const d = await r.json().catch(() => ({}));
+  if (!r.headers.get("content-type")?.includes("application/json"))
+    throw new Error(
+      "El servidor no devolvió datos de la app. Comprueba el acceso a Vercel o recarga.",
+    );
+  const d = await r.json();
   if (!r.ok) {
     if (r.status === 401) window.dispatchEvent(new Event("admin-expired"));
-    throw new Error(d.error || "No se pudo completar la operación.");
+    const error = new Error(d.error || "No se pudo completar la operación.");
+    error.status = r.status;
+    throw error;
   }
   return d;
 }
