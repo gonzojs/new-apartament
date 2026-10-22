@@ -1,6 +1,6 @@
-# Mi Nuevo Apartamento
+# Mis favoritos
 
-Lista pública personal de productos para España/EUR. Edición, comentarios, favoritos, búsqueda en tiendas y comprobaciones manuales protegidos mediante una clave de administrador. Sin cuentas ni Google.
+Lista pública personal para buscar productos, guardar favoritos para futuras compras y marcar los comprados. España/EUR. Edición, comentarios, favoritos, búsqueda en tiendas y comprobaciones manuales protegidos mediante una clave de administrador. Sin cuentas ni Google.
 
 ## Arquitectura
 
